@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Text Color Changer",
+  "version": "1.0",
+  "description": "Changes dark blue text to white",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": ["styles.css"]
+    }
+  ]
+}

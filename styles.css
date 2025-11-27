@@ -1,0 +1,5 @@
+.chat-list-wrapper,
+.chat-list,
+.comment-wrapper * {
+    color: white !important;
+}
