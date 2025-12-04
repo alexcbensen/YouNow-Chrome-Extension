@@ -1,5 +1,3 @@
-.chat-list-wrapper,
-.chat-list,
-.comment-wrapper * {
+.user-card__body {
     color: white !important;
 }
