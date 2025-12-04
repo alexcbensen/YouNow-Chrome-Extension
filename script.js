@@ -1,5 +1,5 @@
 const myUsernames = ["Alex"];
-const friendUsernames = ["Menacing"];
+const friendUsernames = ["Menacing", "JusWithoutTheTin"];
 
 const gradients = {
     300: "linear-gradient(115.62deg, rgb(0, 200, 170) 17.43%, rgb(0, 150, 200) 84.33%)",
@@ -14,7 +14,7 @@ const gradients = {
 };
 
 const myGradient = gradients[2500];
-const friendColor = "rgba(0, 191, 255, 0.5)";
+const friendGradient = gradients[1000];
 
 function applyBorders() {
     myUsernames.forEach(username => {
@@ -28,6 +28,11 @@ function applyBorders() {
                     card.style.backgroundImage = `linear-gradient(#212121, #212121), ${myGradient}`;
                     card.style.backgroundOrigin = 'border-box';
                     card.style.backgroundClip = 'padding-box, border-box';
+                }
+
+                const comment = li.querySelector('.comment');
+                if (comment) {
+                    comment.className = 'comment ng-star-inserted';
                 }
 
                 const levelBadge = li.querySelector('app-user-level .user-level');
@@ -49,9 +54,14 @@ function applyBorders() {
                 if (card) {
                     card.style.border = '2px solid transparent';
                     card.style.borderRadius = '8px';
-                    card.style.backgroundImage = `linear-gradient(#212121, #212121), ${myGradient}`;
+                    card.style.backgroundImage = `linear-gradient(#212121, #212121), ${friendGradient}`;
                     card.style.backgroundOrigin = 'border-box';
                     card.style.backgroundClip = 'padding-box, border-box';
+                }
+
+                const comment = li.querySelector('.comment');
+                if (comment) {
+                    comment.className = 'comment ng-star-inserted';
                 }
             }
         });
