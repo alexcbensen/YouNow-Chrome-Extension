@@ -4,6 +4,6 @@
 
 /* Red border for my messages */
 li:has(span[title="Alex"]) .user-card {
-    border: 2px solid red;
+    border: 2px solid #ff4f42;
     border-radius: 8px;
 }
