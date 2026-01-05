@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Text Color Changer",
-  "version": "1.0",
-  "description": "Changes dark blue text to white",
+  "name": "Alex's YouNow Extension",
+  "version": "1.5",
+  "description": "A mix of features to improve upon the YouNow experience",
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
