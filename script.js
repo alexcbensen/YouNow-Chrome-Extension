@@ -17,16 +17,17 @@ const gradients = {
 
 const myGradient = gradients[6767];
 const friendGradient = gradients[1000];
-
-const myTextColor = "#FFD700"; // Gold
-const friendTextColor = "#FFFFFF"; // White
-
-// MutationObserver to hide broadcasters as soon as they appear
-const observer = new MutationObserver((mutations) => {
-    hideBroadcasters();
-});
+const myTextColor = "#FFD700";
+const friendTextColor = "#FFFFFF";
 
 let gridViewEnabled = false;
+
+// Debounce for carousel skipping - prevent rapid clicks
+let lastSkipTime = 0;
+const SKIP_COOLDOWN = 750; // 0.5 seconds between skips
+
+// Track navigation direction: 'next' or 'prev'
+let lastDirection = 'next';
 
 function applyBorders() {
     myUsernames.forEach(username => {
@@ -94,10 +95,80 @@ function hideBroadcasters() {
     hiddenBroadcasters.forEach(username => {
         document.querySelectorAll(`a[href="/${username}"]`).forEach(el => {
             const card = el.closest('li');
-            if (card) {
+            if (card && !card.closest('app-broadcasts-carousel')) {
                 card.style.display = 'none';
             }
         });
+    });
+}
+
+// Set up listeners to track which direction user is navigating
+function setupCarouselDirectionTracking() {
+    const carousel = document.querySelector('app-broadcasts-carousel');
+    if (!carousel || carousel.dataset.directionTracked) return;
+
+    const prevBtn = carousel.querySelector('.button--prev');
+    const nextBtn = carousel.querySelector('.button--next');
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            lastDirection = 'prev';
+        }, true);
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            lastDirection = 'next';
+        }, true);
+    }
+
+    carousel.dataset.directionTracked = 'true';
+}
+
+function hideCarouselBroadcasters() {
+    const carousel = document.querySelector('app-broadcasts-carousel');
+    if (!carousel) return;
+
+    // Set up direction tracking if not already done
+    setupCarouselDirectionTracking();
+
+    const entries = carousel.querySelectorAll('.list__entry');
+    const now = Date.now();
+
+    entries.forEach(entry => {
+        // Check if this is the active/center entry (has disabled button)
+        const isActive = entry.querySelector('button.entry__button[disabled]') !== null;
+
+        if (isActive) {
+            // Active entry has username visible - check if it's a hidden broadcaster
+            const usernameEl = entry.querySelector('h5.username') ||
+                entry.querySelector('.toolbar .username span');
+
+            if (usernameEl) {
+                const username = usernameEl.textContent.trim();
+                const isHidden = hiddenBroadcasters.some(hidden =>
+                    hidden.toLowerCase() === username.toLowerCase()
+                );
+
+                if (isHidden) {
+                    // Auto-skip in the same direction user was going (with cooldown)
+                    if (now - lastSkipTime > SKIP_COOLDOWN) {
+                        lastSkipTime = now;
+
+                        // Choose button based on last navigation direction
+                        const btnClass = lastDirection === 'prev' ? '.button--prev' : '.button--next';
+                        const skipBtn = carousel.querySelector(btnClass);
+
+                        if (skipBtn) {
+                            // Small delay to let carousel settle
+                            setTimeout(() => {
+                                skipBtn.click();
+                            }, 100);
+                        }
+                    }
+                }
+            }
+        }
     });
 }
 
@@ -145,12 +216,19 @@ function applyGridView() {
     }
 }
 
+const observer = new MutationObserver(() => {
+    hideBroadcasters();
+    hideCarouselBroadcasters();
+});
+
 applyBorders();
 hideBroadcasters();
+hideCarouselBroadcasters();
 
 setInterval(createGridToggle, 1000);
 setInterval(applyGridView, 1000);
 setInterval(applyBorders, 1000);
+setInterval(hideCarouselBroadcasters, 200);
 
 observer.observe(document.body, {
     childList: true,
