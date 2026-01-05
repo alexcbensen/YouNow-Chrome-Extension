@@ -1,6 +1,6 @@
 const myUsernames = ["Alex"];
 const friendUsernames = ["Menacing", "JusWithoutTheTin", "ThatDudeJon", "TeressaMarie"];
-const hiddenBroadcasters = ["mcfroger3", "unhingedfaerie"];
+const hiddenBroadcasters = ["mcfroger3", "unhingedfaerie", "StonrZax"];
 
 const gradients = {
     300: "linear-gradient(115.62deg, rgb(0, 200, 170) 17.43%, rgb(0, 150, 200) 84.33%)",
