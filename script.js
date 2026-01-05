@@ -21,6 +21,11 @@ const friendGradient = gradients[1000];
 const myTextColor = "#FFD700"; // Gold
 const friendTextColor = "#FFFFFF"; // White
 
+// MutationObserver to hide broadcasters as soon as they appear
+const observer = new MutationObserver((mutations) => {
+    hideBroadcasters();
+});
+
 let gridViewEnabled = false;
 
 function applyBorders() {
@@ -144,4 +149,8 @@ hideBroadcasters();
 setInterval(createGridToggle, 1000);
 setInterval(applyGridView, 1000);
 setInterval(applyBorders, 1000);
-setInterval(hideBroadcasters, 1000);
+
+observer.observe(document.body, {
+    childList: true,
+    subtree: true
+});
