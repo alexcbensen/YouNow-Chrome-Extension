@@ -41,7 +41,7 @@ app-chat .user-card__body {
 
 /* Block clicks on video area but allow toolbar */
 .grid-view-enabled app-channel .fullscreen-wrapper > .video > .main-video-wrapper {
-    pointer-events: none !important;
+    pointer-events: auto !important;
 }
 
 .grid-view-enabled app-channel .fullscreen-wrapper > .video app-toolbar-overlay,
