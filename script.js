@@ -240,6 +240,18 @@ function applyGridView() {
     }
 }
 
+function fixVideoFit() {
+    const allVideos = document.querySelectorAll('.video-player video');
+
+    allVideos.forEach(video => {
+        if (video.classList.contains('is-screenshare')) {
+            video.style.objectFit = 'contain';
+        } else {
+            video.style.objectFit = 'cover';
+        }
+    });
+}
+
 const observer = new MutationObserver(() => {
     hideBroadcasters();
     hideCarouselBroadcasters();
@@ -252,6 +264,7 @@ hideCarouselBroadcasters();
 setInterval(createGridToggle, 1000);
 setInterval(applyGridView, 1000);
 setInterval(applyBorders, 1000);
+setInterval(fixVideoFit, 1000);
 setInterval(hideCarouselBroadcasters, 200);
 
 observer.observe(document.body, {
