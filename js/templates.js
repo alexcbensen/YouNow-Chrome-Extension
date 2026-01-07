@@ -110,8 +110,10 @@ const templates = {
             background: #1a1a1a;
             border-radius: 12px;
             padding: 30px;
-            min-width: 400px;
-            min-height: 300px;
+            min-width: 500px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
             border: 1px solid #333;
             position: relative;
         ">
@@ -126,11 +128,79 @@ const templates = {
                 cursor: pointer;
             ">&times;</button>
             <h2 style="color: white; margin: 0 0 20px 0; font-family: proxima-nova, sans-serif;">Admin Panel</h2>
+            
             <div id="admin-panel-content" style="color: #888; font-family: proxima-nova, sans-serif;">
-                <!-- Content will be added here later -->
-                <p>Panel content coming soon...</p>
+                <!-- Friend Usernames Section -->
+                <div style="margin-bottom: 24px;">
+                    <h3 style="color: white; margin: 0 0 12px 0; font-size: 16px;">Friend Usernames</h3>
+                    <div id="friend-usernames-list" style="margin-bottom: 10px;"></div>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="friend-username-input" placeholder="Add username" style="
+                            flex: 1;
+                            background: #2a2a2a;
+                            border: 1px solid #444;
+                            border-radius: 6px;
+                            padding: 8px 12px;
+                            color: white;
+                            font-size: 14px;
+                            outline: none;
+                        " />
+                        <button id="add-friend-btn" style="
+                            background: #22c55e;
+                            border: none;
+                            border-radius: 6px;
+                            padding: 8px 16px;
+                            color: white;
+                            font-size: 14px;
+                            cursor: pointer;
+                        ">Add</button>
+                    </div>
+                </div>
+                
+                <!-- Hidden Broadcasters Section -->
+                <div style="margin-bottom: 24px;">
+                    <h3 style="color: white; margin: 0 0 12px 0; font-size: 16px;">Hidden Broadcasters</h3>
+                    <div id="hidden-broadcasters-list" style="margin-bottom: 10px;"></div>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="hidden-broadcaster-input" placeholder="Add broadcaster" style="
+                            flex: 1;
+                            background: #2a2a2a;
+                            border: 1px solid #444;
+                            border-radius: 6px;
+                            padding: 8px 12px;
+                            color: white;
+                            font-size: 14px;
+                            outline: none;
+                        " />
+                        <button id="add-hidden-btn" style="
+                            background: #22c55e;
+                            border: none;
+                            border-radius: 6px;
+                            padding: 8px 16px;
+                            color: white;
+                            font-size: 14px;
+                            cursor: pointer;
+                        ">Add</button>
+                    </div>
+                </div>
+                
+                <!-- Save Button -->
+                <div style="margin-bottom: 16px;">
+                    <button id="admin-save-btn" style="
+                        background: #3b82f6;
+                        border: none;
+                        border-radius: 8px;
+                        padding: 12px 24px;
+                        color: white;
+                        font-size: 16px;
+                        cursor: pointer;
+                        width: 100%;
+                    ">Save Changes</button>
+                    <p id="admin-save-status" style="color: #888; margin: 10px 0 0 0; text-align: center; display: none;"></p>
+                </div>
             </div>
-            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+            
+            <div style="padding-top: 16px; border-top: 1px solid #333;">
                 <button id="admin-panel-lock" style="
                     background: #444;
                     border: none;

@@ -9,14 +9,14 @@ const firebaseConfig = {
     appId: "1:996954294250:web:882829106bc4bad1859493"
 };
 
-// Firebase SDK loaded via importScripts won't work in content scripts
-// We'll use the REST API instead for Firestore
-
 const FIRESTORE_BASE_URL = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
 
 // Settings cache
 let firebaseSettings = null;
 let settingsLoaded = false;
+
+// Auth state
+let firebaseIdToken = sessionStorage.getItem('firebaseIdToken') || null;
 
 async function loadSettingsFromFirebase() {
     try {
@@ -106,3 +106,201 @@ function applyFirebaseSettings() {
 
 // Load settings on startup
 loadSettingsFromFirebase();
+
+// Sign in with email/password
+async function signInWithEmailPassword(email, password) {
+    const response = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseConfig.apiKey}`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: email,
+                password: password,
+                returnSecureToken: true
+            })
+        }
+    );
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || 'Auth failed');
+    }
+
+    const data = await response.json();
+    return data.idToken;
+}
+
+function showAuthPrompt() {
+    return new Promise((resolve, reject) => {
+        const overlay = createOverlay('auth-overlay', `
+            <div style="
+                background: #1a1a1a;
+                border-radius: 12px;
+                padding: 30px;
+                text-align: center;
+                border: 1px solid #333;
+            ">
+                <h2 style="color: white; margin: 0 0 20px 0; font-family: proxima-nova, sans-serif;">Sign In to Save</h2>
+                <input type="email" id="auth-email" placeholder="Email" style="
+                    background: #2a2a2a;
+                    border: 1px solid #444;
+                    border-radius: 8px;
+                    padding: 12px 20px;
+                    color: white;
+                    font-size: 16px;
+                    width: 250px;
+                    outline: none;
+                    display: block;
+                    margin: 0 auto 10px auto;
+                " />
+                <input type="password" id="auth-password" placeholder="Password" style="
+                    background: #2a2a2a;
+                    border: 1px solid #444;
+                    border-radius: 8px;
+                    padding: 12px 20px;
+                    color: white;
+                    font-size: 16px;
+                    width: 250px;
+                    outline: none;
+                    display: block;
+                    margin: 0 auto;
+                " />
+                <div style="margin-top: 20px;">
+                    <button id="auth-submit" style="
+                        background: #22c55e;
+                        border: none;
+                        border-radius: 8px;
+                        padding: 10px 30px;
+                        color: white;
+                        font-size: 16px;
+                        cursor: pointer;
+                        margin-right: 10px;
+                    ">Sign In</button>
+                    <button id="auth-cancel" style="
+                        background: #444;
+                        border: none;
+                        border-radius: 8px;
+                        padding: 10px 30px;
+                        color: white;
+                        font-size: 16px;
+                        cursor: pointer;
+                    ">Cancel</button>
+                </div>
+                <p id="auth-error" style="color: #ef4444; margin: 15px 0 0 0; display: none;"></p>
+            </div>
+        `);
+        document.body.appendChild(overlay);
+
+        const emailInput = document.getElementById('auth-email');
+        const passwordInput = document.getElementById('auth-password');
+        const submitBtn = document.getElementById('auth-submit');
+        const cancelBtn = document.getElementById('auth-cancel');
+        const errorMsg = document.getElementById('auth-error');
+
+        emailInput.focus();
+
+        const trySignIn = async () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                errorMsg.textContent = 'Please enter email and password';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Signing in...';
+                const token = await signInWithEmailPassword(email, password);
+                sessionStorage.setItem('firebaseIdToken', token);
+                overlay.remove();
+                resolve(token);
+            } catch (error) {
+                errorMsg.textContent = error.message;
+                errorMsg.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Sign In';
+            }
+        };
+
+        submitBtn.addEventListener('click', trySignIn);
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') trySignIn();
+        });
+        cancelBtn.addEventListener('click', () => {
+            overlay.remove();
+            reject(new Error('Sign-in cancelled'));
+        });
+    });
+}
+
+async function saveSettingsToFirebase() {
+    const statusEl = document.getElementById('admin-save-status');
+    const saveBtn = document.getElementById('admin-save-btn');
+
+    try {
+        statusEl.style.display = 'block';
+        statusEl.style.color = '#888';
+        statusEl.textContent = 'Authenticating...';
+        saveBtn.disabled = true;
+
+        // Get auth token if we don't have one
+        if (!firebaseIdToken) {
+            firebaseIdToken = await showAuthPrompt();
+        }
+
+        statusEl.textContent = 'Saving...';
+
+        const response = await fetch(
+            `${FIRESTORE_BASE_URL}/config/settings?updateMask.fieldPaths=friendUsernames&updateMask.fieldPaths=hiddenBroadcasters`,
+            {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${firebaseIdToken}`
+                },
+                body: JSON.stringify({
+                    fields: {
+                        friendUsernames: {
+                            arrayValue: {
+                                values: friendUsernames.map(u => ({ stringValue: u }))
+                            }
+                        },
+                        hiddenBroadcasters: {
+                            arrayValue: {
+                                values: hiddenBroadcasters.map(u => ({ stringValue: u }))
+                            }
+                        }
+                    }
+                })
+            }
+        );
+
+        if (!response.ok) {
+            const error = await response.json();
+            // If token expired, clear it and retry once
+            if (response.status === 401 || response.status === 403) {
+                firebaseIdToken = null;
+                sessionStorage.removeItem('firebaseIdToken');
+                throw new Error('Auth expired. Please try again.');
+            }
+            throw new Error(error.error?.message || 'Failed to save');
+        }
+
+        statusEl.style.color = '#22c55e';
+        statusEl.textContent = 'Saved successfully!';
+
+        setTimeout(() => {
+            statusEl.style.display = 'none';
+        }, 2000);
+
+    } catch (error) {
+        console.error('Error saving to Firebase:', error);
+        statusEl.style.color = '#ef4444';
+        statusEl.textContent = 'Error: ' + error.message;
+    } finally {
+        saveBtn.disabled = false;
+    }
+}
