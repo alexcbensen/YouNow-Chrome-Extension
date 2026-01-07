@@ -23,6 +23,230 @@ const friendTextColor = "#FFFFFF";
 
 let gridViewEnabled = false;
 
+// Admin panel settings
+const ADMIN_USERNAME = "Alex";
+
+function isAdminUnlocked() {
+    return sessionStorage.getItem('adminUnlocked') === 'true';
+}
+
+function unlockAdmin() {
+    sessionStorage.setItem('adminUnlocked', 'true');
+}
+
+function getStoredPIN() {
+    return new Promise((resolve) => {
+        chrome.storage.sync.get(['adminPIN'], (result) => {
+            resolve(result.adminPIN || null);
+        });
+    });
+}
+
+function setStoredPIN(pin) {
+    return new Promise((resolve) => {
+        chrome.storage.sync.set({ adminPIN: pin }, () => {
+            resolve();
+        });
+    });
+}
+
+function createAdminPanelEntry() {
+    const currenciesWrapper = document.querySelector('app-profile-dropdown .currencies-infos-wrapper > div');
+    if (!currenciesWrapper || document.getElementById('admin-panel-btn')) return;
+
+    // Check if user is Alex
+    const usernameEl = document.querySelector('app-profile-dropdown .username');
+    if (!usernameEl || usernameEl.textContent.trim() !== ADMIN_USERNAME) return;
+
+    const isUnlocked = isAdminUnlocked();
+
+    const adminBtn = document.createElement('button');
+    adminBtn.id = 'admin-panel-btn';
+    adminBtn.className = 'button';
+    adminBtn.style.cssText = `
+        background: #444;
+        border: none;
+        border-radius: 100rem;
+        padding: 0.65rem 1.25rem;
+        color: white;
+        cursor: pointer;
+        margin-top: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        font-family: proxima-nova, sans-serif;
+        width: auto;
+    `;
+    adminBtn.innerHTML = `<i class="bi ${isUnlocked ? 'bi-unlock-fill' : 'bi-lock-fill'}" id="admin-lock-icon"></i><span>Admin Panel</span>`;
+    adminBtn.title = 'Admin Panel';
+
+    adminBtn.addEventListener('click', handleAdminClick);
+
+    // Find the Get Bars & Pearls button and insert after it
+    const barsBtn = currenciesWrapper.querySelector('.button--purple');
+    if (barsBtn) {
+        barsBtn.parentNode.insertBefore(adminBtn, barsBtn.nextSibling);
+    }
+}
+
+async function handleAdminClick() {
+    // Close the profile dropdown popover
+    const popover = document.querySelector('ngb-popover-window');
+    if (popover) popover.remove();
+
+    // Also try clicking outside to close it
+    document.body.click();
+
+    if (isAdminUnlocked()) {
+        openAdminPanel();
+    } else {
+        const storedPIN = await getStoredPIN();
+        if (storedPIN) {
+            showPinPrompt();
+        } else {
+            showCreatePinPrompt();
+        }
+    }
+}
+
+function createOverlay(id, content) {
+    const overlay = document.createElement('div');
+    overlay.id = id;
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+    overlay.innerHTML = content;
+    return overlay;
+}
+
+function showCreatePinPrompt() {
+    const existing = document.getElementById('admin-pin-overlay');
+    if (existing) existing.remove();
+
+    const overlay = createOverlay('admin-pin-overlay', templates.createPinPrompt);
+    document.body.appendChild(overlay);
+
+    const pinInput = document.getElementById('admin-pin-input');
+    const confirmInput = document.getElementById('admin-pin-confirm');
+    const submitBtn = document.getElementById('admin-pin-submit');
+    const cancelBtn = document.getElementById('admin-pin-cancel');
+    const errorMsg = document.getElementById('admin-pin-error');
+
+    pinInput.focus();
+
+    const tryCreate = async () => {
+        const pin = pinInput.value;
+        const confirm = confirmInput.value;
+
+        if (pin.length < 4) {
+            errorMsg.textContent = 'PIN must be at least 4 characters';
+            errorMsg.style.display = 'block';
+            return;
+        }
+
+        if (pin !== confirm) {
+            errorMsg.textContent = 'PINs do not match';
+            errorMsg.style.display = 'block';
+            confirmInput.value = '';
+            confirmInput.focus();
+            return;
+        }
+
+        await setStoredPIN(pin);
+        unlockAdmin();
+        overlay.remove();
+        updateAdminIcon();
+        openAdminPanel();
+    };
+
+    submitBtn.addEventListener('click', tryCreate);
+    confirmInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') tryCreate();
+    });
+    cancelBtn.addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+    });
+}
+
+function showPinPrompt() {
+    const existing = document.getElementById('admin-pin-overlay');
+    if (existing) existing.remove();
+
+    const overlay = createOverlay('admin-pin-overlay', templates.pinPrompt);
+    document.body.appendChild(overlay);
+
+    const input = document.getElementById('admin-pin-input');
+    const submitBtn = document.getElementById('admin-pin-submit');
+    const cancelBtn = document.getElementById('admin-pin-cancel');
+    const errorMsg = document.getElementById('admin-pin-error');
+
+    input.focus();
+
+    const tryUnlock = async () => {
+        const storedPIN = await getStoredPIN();
+        if (input.value === storedPIN) {
+            unlockAdmin();
+            overlay.remove();
+            updateAdminIcon();
+            openAdminPanel();
+        } else {
+            errorMsg.style.display = 'block';
+            input.value = '';
+            input.focus();
+        }
+    };
+
+    submitBtn.addEventListener('click', tryUnlock);
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') tryUnlock();
+    });
+    cancelBtn.addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+    });
+}
+
+function updateAdminIcon() {
+    const icon = document.getElementById('admin-lock-icon');
+    if (icon) {
+        icon.className = isAdminUnlocked() ? 'bi bi-unlock-fill' : 'bi bi-lock-fill';
+    }
+}
+
+function openAdminPanel() {
+    const existing = document.getElementById('admin-panel-overlay');
+    if (existing) existing.remove();
+
+    const overlay = createOverlay('admin-panel-overlay', templates.adminPanel);
+    document.body.appendChild(overlay);
+
+    const closeBtn = document.getElementById('admin-panel-close');
+    closeBtn.addEventListener('click', () => overlay.remove());
+
+    const lockBtn = document.getElementById('admin-panel-lock');
+    lockBtn.addEventListener('click', () => {
+        sessionStorage.removeItem('adminUnlocked');
+        updateAdminIcon();
+        overlay.remove();
+    });
+
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+    });
+}
+
 // Debounce for carousel skipping - prevent rapid clicks
 let lastSkipTime = 0;
 const SKIP_COOLDOWN = 1000; // 1 second between skips
@@ -277,12 +501,20 @@ hideCarouselBroadcasters();
 
 // Apply borders again after a delay to catch messages loaded after initial render
 setTimeout(applyBorders, 500);
-setTimeout(applyBorders, 1000);
-setInterval(applyGridView, 1000);
+setTimeout(applyBorders, 1500);
+setTimeout(applyBorders, 3000);
+
 setInterval(createGridToggle, 1000);
-setInterval(observeChat, 1000);
+setInterval(applyGridView, 1000);
+setInterval(observeChat, 1000); // Keep trying to attach observer
 setInterval(fixVideoFit, 1000);
 setInterval(hideCarouselBroadcasters, 200);
+
+// Watch for profile popover to add admin button instantly
+const popoverObserver = new MutationObserver(() => {
+    createAdminPanelEntry();
+});
+popoverObserver.observe(document.body, { childList: true, subtree: true });
 
 observer.observe(document.body, {
     childList: true,

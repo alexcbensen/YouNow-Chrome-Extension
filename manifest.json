@@ -8,11 +8,12 @@
     "128": "favicon-3.png"
   },
   "description": "A mix of features to improve upon the YouNow experience",
+  "permissions": ["storage"],
   "content_scripts": [
     {
       "matches": ["https://www.younow.com/*", "https://younow.com/*"],
       "css": ["styles.css"],
-      "js": ["script.js"]
+      "js": ["templates.js", "script.js"]
     }
   ],
   "web_accessible_resources": [
