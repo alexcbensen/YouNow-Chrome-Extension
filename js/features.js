@@ -1,3 +1,11 @@
+/*
+ * Alex's BetterNow
+ * Copyright (c) 2026 Alex
+ * All rights reserved.
+ *
+ * This code may not be copied, modified, or distributed without permission.
+ */
+
 // Chat, grid view, carousel, and chest features
 
 let gridViewEnabled = false;
