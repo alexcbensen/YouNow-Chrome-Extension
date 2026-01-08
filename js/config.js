@@ -1,5 +1,5 @@
 // Admin settings
-const ADMIN_USER_ID = "60578594";
+const ADMIN_USER_IDS = ["60578594", "60974148"];
 
 // Username lists (loaded from Firebase)
 let myUsername = "";

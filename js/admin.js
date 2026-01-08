@@ -14,7 +14,7 @@ async function verifyAdminUser() {
     try {
         const response = await fetch(`https://api.younow.com/php/api/broadcast/info/user=${username}`);
         const data = await response.json();
-        verifiedAdmin = data.userId?.toString() === ADMIN_USER_ID;
+        verifiedAdmin = ADMIN_USER_IDS.includes(data.userId?.toString());
         return verifiedAdmin;
     } catch (e) {
         return false;
