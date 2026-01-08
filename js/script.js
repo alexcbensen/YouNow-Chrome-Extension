@@ -8,6 +8,30 @@
 
 // Main entry point - initializes all features
 
+// ============ Current User Detection ============
+
+async function detectCurrentUser() {
+    const usernameEl = document.querySelector('app-profile-dropdown .username');
+    if (!usernameEl || currentUserId) return;
+
+    const username = usernameEl.textContent.trim();
+    if (!username) return;
+
+    try {
+        const response = await fetch(`https://cdn.younow.com/php/api/channel/getInfo/user=${username}`);
+        const data = await response.json();
+        if (data.userId) {
+            currentUserId = String(data.userId);
+        }
+    } catch (e) {
+        // Silently fail
+    }
+}
+
+// Detect current user on load and periodically
+detectCurrentUser();
+setInterval(detectCurrentUser, 5000);
+
 // ============ Initial Setup ============
 
 applyBorders();

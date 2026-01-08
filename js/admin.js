@@ -32,6 +32,10 @@ async function verifyAdminUser() {
     try {
         const response = await fetch(`https://api.younow.com/php/api/broadcast/info/user=${username}`);
         const data = await response.json();
+        // Store current user ID for exception checking
+        if (data.userId) {
+            currentUserId = data.userId.toString();
+        }
         verifiedAdmin = ADMIN_USER_IDS.includes(data.userId?.toString());
         return verifiedAdmin;
     } catch (e) {
@@ -131,6 +135,17 @@ function openAdminPanel() {
     // Populate lists
     renderFriendUsernames();
     renderHiddenBroadcasters();
+
+    // Hidden broadcasters dropdown toggle
+    const hiddenToggle = document.getElementById('hidden-broadcasters-toggle');
+    const hiddenContent = document.getElementById('hidden-broadcasters-content');
+    const hiddenArrow = document.getElementById('hidden-broadcasters-arrow');
+
+    hiddenToggle.addEventListener('click', () => {
+        const isHidden = hiddenContent.style.display === 'none';
+        hiddenContent.style.display = isHidden ? 'block' : 'none';
+        hiddenArrow.textContent = isHidden ? '▼' : '▶';
+    });
 
     // Close button
     const closeBtn = document.getElementById('admin-panel-close');
@@ -580,48 +595,196 @@ function renderHiddenBroadcasters() {
         const userData = hiddenUsers[odiskd] || {};
         const username = userData.username || odiskd;
         const avatar = userData.avatar || '';
-        return `
-        <div style="
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #2a2a2a;
-            border-radius: 6px;
-            padding: 8px 12px;
-            margin-bottom: 6px;
-        ">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <img src="${avatar}" alt="" style="
-                    width: 28px;
-                    height: 28px;
-                    border-radius: 50%;
-                    background: #444;
-                    display: ${avatar ? 'block' : 'none'};
-                " onerror="this.style.display='none'" />
-                <span style="color: white;">${username}</span>
+        const exceptions = hiddenExceptions[odiskd] || {};
+        const exceptionCount = Object.keys(exceptions).length;
+
+        // Build exception list HTML
+        const exceptionListHtml = Object.entries(exceptions).map(([exId, exData]) => `
+            <div style="display: flex; align-items: center; justify-content: space-between; background: #333; border-radius: 4px; padding: 6px 10px; margin-top: 4px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <img src="${exData.avatar || ''}" alt="" style="width: 20px; height: 20px; border-radius: 50%; background: #444; display: ${exData.avatar ? 'block' : 'none'};" onerror="this.style.display='none'" />
+                    <span style="color: #ccc; font-size: 12px;">${exData.username || exId}</span>
+                </div>
+                <button data-remove-exception-user="${exId}" data-hidden-id="${odiskd}" style="background: #ef4444; border: none; border-radius: 3px; padding: 2px 6px; color: white; font-size: 10px; cursor: pointer;">✕</button>
             </div>
-            <div style="display: flex; gap: 6px;">
-                <button data-refresh-hidden="${odiskd}" title="Refresh user" style="
-                    background: #666;
-                    border: none;
-                    border-radius: 4px;
-                    padding: 4px 8px;
-                    color: white;
-                    font-size: 12px;
-                    cursor: pointer;
-                ">🔄</button>
-                <button data-remove-hidden="${index}" style="
-                    background: #ef4444;
-                    border: none;
-                    border-radius: 4px;
-                    padding: 4px 8px;
-                    color: white;
-                    font-size: 12px;
-                    cursor: pointer;
-                ">Remove</button>
+        `).join('');
+
+        return `
+        <div class="hidden-broadcaster-item" style="background: #2a2a2a; border-radius: 6px; padding: 8px 12px; margin-bottom: 6px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="${avatar}" alt="" style="
+                        width: 28px;
+                        height: 28px;
+                        border-radius: 50%;
+                        background: #444;
+                        display: ${avatar ? 'block' : 'none'};
+                    " onerror="this.style.display='none'" />
+                    <span style="color: white;">${username}</span>
+                </div>
+                <div style="display: flex; gap: 6px;">
+                    <button data-refresh-hidden="${odiskd}" title="Refresh user" style="
+                        background: #666;
+                        border: none;
+                        border-radius: 4px;
+                        padding: 4px 8px;
+                        color: white;
+                        font-size: 12px;
+                        cursor: pointer;
+                    ">🔄</button>
+                    <button data-toggle-exceptions="${odiskd}" title="Exceptions" style="
+                        background: #3b82f6;
+                        border: none;
+                        border-radius: 4px;
+                        padding: 4px 8px;
+                        color: white;
+                        font-size: 12px;
+                        cursor: pointer;
+                    ">👁️</button>
+                    <button data-remove-hidden="${index}" style="
+                        background: #ef4444;
+                        border: none;
+                        border-radius: 4px;
+                        padding: 4px 8px;
+                        color: white;
+                        font-size: 12px;
+                        cursor: pointer;
+                    ">Remove</button>
+                </div>
+            </div>
+            <div data-exceptions-panel="${odiskd}" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #444;">
+                <p style="color: #888; font-size: 11px; margin: 0 0 6px 0;">Users who can see ${username}:</p>
+                <div data-exceptions-list="${odiskd}">${exceptionListHtml}</div>
+                <div style="display: flex; gap: 6px; margin-top: 8px;">
+                    <input type="text" data-exception-input="${odiskd}" placeholder="Add username" style="
+                        flex: 1;
+                        background: #333;
+                        border: 1px solid #555;
+                        border-radius: 4px;
+                        padding: 6px 10px;
+                        color: white;
+                        font-size: 12px;
+                        outline: none;
+                    " />
+                    <button data-add-exception="${odiskd}" style="
+                        background: #22c55e;
+                        border: none;
+                        border-radius: 4px;
+                        padding: 6px 12px;
+                        color: white;
+                        font-size: 12px;
+                        cursor: pointer;
+                    ">Add</button>
+                </div>
             </div>
         </div>
     `}).join('');
+
+    // Add click handlers for toggle exceptions buttons
+    container.querySelectorAll('[data-toggle-exceptions]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const odiskd = btn.getAttribute('data-toggle-exceptions');
+            const panel = container.querySelector(`[data-exceptions-panel="${odiskd}"]`);
+            if (panel) {
+                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+    });
+
+    // Add click handlers for add exception buttons
+    container.querySelectorAll('[data-add-exception]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const hiddenId = btn.getAttribute('data-add-exception');
+            const input = container.querySelector(`[data-exception-input="${hiddenId}"]`);
+            const username = input.value.trim();
+
+            if (!username) return;
+
+            btn.textContent = '...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`https://cdn.younow.com/php/api/channel/getInfo/user=${username}`);
+                const data = await response.json();
+
+                if (!data.userId) {
+                    btn.textContent = 'Not found';
+                    setTimeout(() => { btn.textContent = 'Add'; btn.disabled = false; }, 1500);
+                    return;
+                }
+
+                const exceptionId = String(data.userId);
+
+                // Initialize exceptions object for this hidden user if needed
+                if (!hiddenExceptions[hiddenId]) {
+                    hiddenExceptions[hiddenId] = {};
+                }
+
+                // Check for duplicate
+                if (hiddenExceptions[hiddenId][exceptionId]) {
+                    btn.textContent = 'Already added';
+                    setTimeout(() => { btn.textContent = 'Add'; btn.disabled = false; }, 1500);
+                    return;
+                }
+
+                // Add exception
+                hiddenExceptions[hiddenId][exceptionId] = {
+                    username: data.profile || username,
+                    avatar: `https://ynassets.younow.com/user/live/${data.userId}/${data.userId}.jpg`
+                };
+
+                input.value = '';
+                await saveSettingsToFirebase();
+                renderHiddenBroadcasters();
+
+                // Re-open the panel after re-render
+                setTimeout(() => {
+                    const newPanel = container.querySelector(`[data-exceptions-panel="${hiddenId}"]`);
+                    if (newPanel) newPanel.style.display = 'block';
+                }, 0);
+            } catch (e) {
+                console.error('Error adding exception:', e);
+                btn.textContent = 'Error';
+                setTimeout(() => { btn.textContent = 'Add'; btn.disabled = false; }, 1500);
+            }
+        });
+    });
+
+    // Add enter key handler for exception inputs
+    container.querySelectorAll('[data-exception-input]').forEach(input => {
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const hiddenId = input.getAttribute('data-exception-input');
+                const btn = container.querySelector(`[data-add-exception="${hiddenId}"]`);
+                if (btn) btn.click();
+            }
+        });
+    });
+
+    // Add click handlers for remove exception buttons
+    container.querySelectorAll('[data-remove-exception-user]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const exceptionId = btn.getAttribute('data-remove-exception-user');
+            const hiddenId = btn.getAttribute('data-hidden-id');
+
+            if (hiddenExceptions[hiddenId]) {
+                delete hiddenExceptions[hiddenId][exceptionId];
+                // Clean up empty objects
+                if (Object.keys(hiddenExceptions[hiddenId]).length === 0) {
+                    delete hiddenExceptions[hiddenId];
+                }
+            }
+
+            await saveSettingsToFirebase();
+            renderHiddenBroadcasters();
+
+            // Re-open the panel after re-render
+            setTimeout(() => {
+                const newPanel = container.querySelector(`[data-exceptions-panel="${hiddenId}"]`);
+                if (newPanel) newPanel.style.display = 'block';
+            }, 0);
+        });
+    });
 
     // Add click handlers for refresh buttons
     container.querySelectorAll('[data-refresh-hidden]').forEach(btn => {
@@ -668,8 +831,9 @@ function renderHiddenBroadcasters() {
             const index = parseInt(btn.getAttribute('data-remove-hidden'));
             const odiskd = hiddenUserIds[index];
             hiddenUserIds.splice(index, 1);
-            // Also remove user data
+            // Also remove user data and exceptions
             delete hiddenUsers[odiskd];
+            delete hiddenExceptions[odiskd];
             renderHiddenBroadcasters();
             await saveSettingsToFirebase();
         });

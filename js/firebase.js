@@ -100,6 +100,9 @@ function applyFirebaseSettings() {
     if (firebaseSettings.hiddenUsers) {
         hiddenUsers = firebaseSettings.hiddenUsers;
     }
+    if (firebaseSettings.hiddenExceptions) {
+        hiddenExceptions = firebaseSettings.hiddenExceptions;
+    }
     if (firebaseSettings.friendSettings) {
         friendSettings = firebaseSettings.friendSettings;
     }
@@ -300,8 +303,30 @@ async function saveSettingsToFirebase() {
             };
         }
 
+        // Convert hiddenExceptions object to Firestore map format (nested maps)
+        // Structure: { hiddenUserId: { exceptionUserId: { username, avatar } } }
+        const hiddenExceptionsMap = {};
+        for (const [hiddenId, exceptions] of Object.entries(hiddenExceptions)) {
+            const exceptionsInner = {};
+            for (const [exceptionId, userData] of Object.entries(exceptions)) {
+                exceptionsInner[exceptionId] = {
+                    mapValue: {
+                        fields: {
+                            username: { stringValue: userData.username || '' },
+                            avatar: { stringValue: userData.avatar || '' }
+                        }
+                    }
+                };
+            }
+            hiddenExceptionsMap[hiddenId] = {
+                mapValue: {
+                    fields: exceptionsInner
+                }
+            };
+        }
+
         const response = await fetch(
-            `${FIRESTORE_BASE_URL}/config/settings?updateMask.fieldPaths=friendUserIds&updateMask.fieldPaths=hiddenUserIds&updateMask.fieldPaths=friendUsers&updateMask.fieldPaths=hiddenUsers&updateMask.fieldPaths=friendSettings`,
+            `${FIRESTORE_BASE_URL}/config/settings?updateMask.fieldPaths=friendUserIds&updateMask.fieldPaths=hiddenUserIds&updateMask.fieldPaths=friendUsers&updateMask.fieldPaths=hiddenUsers&updateMask.fieldPaths=hiddenExceptions&updateMask.fieldPaths=friendSettings`,
             {
                 method: 'PATCH',
                 headers: {
@@ -328,6 +353,11 @@ async function saveSettingsToFirebase() {
                         hiddenUsers: {
                             mapValue: {
                                 fields: hiddenUsersMap
+                            }
+                        },
+                        hiddenExceptions: {
+                            mapValue: {
+                                fields: hiddenExceptionsMap
                             }
                         },
                         friendSettings: {

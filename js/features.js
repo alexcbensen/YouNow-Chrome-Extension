@@ -586,14 +586,34 @@ function fixVideoFit() {
 
 function hideBroadcasters() {
     hiddenUserIds.forEach(odiskd => {
+        // Check if current user is an exception for this specific hidden broadcaster
+        const exceptions = hiddenExceptions[odiskd] || {};
+        if (currentUserId && exceptions[currentUserId]) {
+            // Current user is exempt from seeing this hidden broadcaster hidden
+            return;
+        }
+
         const userData = hiddenUsers[odiskd] || {};
         const username = userData.username;
-        if (!username) return;
 
-        document.querySelectorAll(`a[href="/${username}"]`).forEach(el => {
-            const card = el.closest('li');
-            if (card && !card.closest('app-broadcasts-carousel')) {
-                card.style.display = 'none';
+        // Hide by username link
+        if (username) {
+            document.querySelectorAll(`a[href="/${username}"]`).forEach(el => {
+                const card = el.closest('li');
+                if (card && !card.closest('app-broadcasts-carousel')) {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Hide streams where hidden user is guesting (by their avatar URL containing userId)
+        document.querySelectorAll(`app-trending-user-guests img.avatar[src*="/${odiskd}/"]`).forEach(img => {
+            const card = img.closest('app-trending-user');
+            if (card) {
+                const li = card.closest('li');
+                if (li && !li.closest('app-broadcasts-carousel')) {
+                    li.style.display = 'none';
+                }
             }
         });
     });
@@ -639,8 +659,14 @@ function hideCarouselBroadcasters() {
 
             if (usernameEl) {
                 const username = usernameEl.textContent.trim();
-                // Check if username matches any hidden user
+                // Check if username matches any hidden user (respecting per-broadcaster exceptions)
                 const isHidden = hiddenUserIds.some(odiskd => {
+                    // Check if current user is an exception for this hidden broadcaster
+                    const exceptions = hiddenExceptions[odiskd] || {};
+                    if (currentUserId && exceptions[currentUserId]) {
+                        return false; // Not hidden for this user
+                    }
+
                     const userData = hiddenUsers[odiskd] || {};
                     return userData.username && userData.username.toLowerCase() === username.toLowerCase();
                 });

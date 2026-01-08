@@ -11,15 +11,20 @@ const EXCLUDED_FROM_AUTO_CHEST = ["alex"]; // Excluded usernames (lowercase)
 // Admin settings
 const ADMIN_USER_IDS = ["60578594", "60974148", "61819309"];
 
+// Current user info (detected from page)
+let currentUserId = null;
+
 // Username lists (loaded from Firebase) - stored as arrays of userIds
 let myUsername = "";
 let friendUserIds = [];
-let hiddenUserIds = [];
+let hiddenUserIds = [];  // Global hidden list - applies to all users
 
 // User data - maps odiskd to user info
 // Format: { "userId": { username: "Name", avatar: "https://..." } }
 let friendUsers = {};
 let hiddenUsers = {};
+// Format: { "hiddenUserId": { "exceptionUserId": { username: "Name", avatar: "https://..." }, ... } }
+let hiddenExceptions = {};
 
 // Friend settings - individual styles per friend (keyed by odiskd)
 // Format: { "userId": { borderEnabled: true, borderColor1: "#ff0000", borderColor2: "#0000ff", textColor: "#ffffff", levelEnabled: true, levelColor1: "#00ff00", levelColor2: "#00ff00" } }

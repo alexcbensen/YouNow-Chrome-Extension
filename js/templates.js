@@ -61,28 +61,33 @@ const templates = {
                 
                 <!-- Hidden Broadcasters Section -->
                 <div style="margin-bottom: 24px;">
-                    <h3 style="color: white; margin: 0 0 12px 0; font-size: 16px;">Hidden Broadcasters</h3>
-                    <div id="hidden-broadcasters-list" style="margin-bottom: 10px;"></div>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="hidden-broadcaster-input" placeholder="Add broadcaster" style="
-                            flex: 1;
-                            background: #2a2a2a;
-                            border: 1px solid #444;
-                            border-radius: 6px;
-                            padding: 8px 12px;
-                            color: white;
-                            font-size: 14px;
-                            outline: none;
-                        " />
-                        <button id="add-hidden-btn" style="
-                            background: #22c55e;
-                            border: none;
-                            border-radius: 6px;
-                            padding: 8px 16px;
-                            color: white;
-                            font-size: 14px;
-                            cursor: pointer;
-                        ">Add</button>
+                    <h3 id="hidden-broadcasters-toggle" style="color: white; margin: 0 0 12px 0; font-size: 16px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <span id="hidden-broadcasters-arrow" style="font-size: 12px;">▶</span>
+                        Hidden Broadcasters
+                    </h3>
+                    <div id="hidden-broadcasters-content" style="display: none;">
+                        <div id="hidden-broadcasters-list" style="margin-bottom: 10px;"></div>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="hidden-broadcaster-input" placeholder="Add broadcaster" style="
+                                flex: 1;
+                                background: #2a2a2a;
+                                border: 1px solid #444;
+                                border-radius: 6px;
+                                padding: 8px 12px;
+                                color: white;
+                                font-size: 14px;
+                                outline: none;
+                            " />
+                            <button id="add-hidden-btn" style="
+                                background: #22c55e;
+                                border: none;
+                                border-radius: 6px;
+                                padding: 8px 16px;
+                                color: white;
+                                font-size: 14px;
+                                cursor: pointer;
+                            ">Add</button>
+                        </div>
                     </div>
                 </div>
                 
