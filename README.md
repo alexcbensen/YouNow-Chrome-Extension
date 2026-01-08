@@ -4,9 +4,13 @@ A Chrome extension that adds visual enhancements and quality-of-life improvement
 
 ## Features
 
-- **Grid View Mode** - Toggle a grid layout for multi-person broadcasts, allowing you to see all participants equally instead of one main video with a smaller guest feed.
-- **Auto Chest Drop** - Automatically open your treasure chest when it reaches a set like threshold while broadcasting.
-- More features to come!
+### Grid View Mode
+Toggle a grid layout for multi-person broadcasts, allowing you to see all participants equally in a 2x2 grid instead of one main video with a smaller guest feed.
+
+### Auto Chest Drop
+Automatically open your treasure chest when it reaches a set like threshold while broadcasting. Features a clean UI that matches YouNow's native style.
+
+**Note:** There is currently a bug where this feature only works on non-partnered accounts.
 
 ## Installation
 
