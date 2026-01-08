@@ -66,51 +66,76 @@ function createChestControls() {
         return btn && btn.textContent.includes('Screenshare');
     });
 
+    // Add CSS to hide number input arrows
+    if (!document.getElementById('chest-input-styles')) {
+        const style = document.createElement('style');
+        style.id = 'chest-input-styles';
+        style.textContent = `
+            #chest-threshold-input::-webkit-outer-spin-button,
+            #chest-threshold-input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+            #chest-threshold-input {
+                -moz-appearance: textfield;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
     const controlsDiv = document.createElement('div');
     controlsDiv.id = 'auto-chest-controls';
     controlsDiv.className = 'toolbar__entry';
     controlsDiv.innerHTML = `
         <div class="toolbar__content" style="display: flex; align-items: center; gap: 8px;">
             <button id="auto-chest-toggle" title="Auto Chest Drop" style="
-                background: ${autoChestEnabled ? '#22c55e' : '#444'};
-                border: none;
-                border-radius: 4px;
-                padding: 4px 8px;
-                color: white;
-                font-size: 12px;
+                background: var(--background-color, #212121);
+                border: 1px solid ${autoChestEnabled ? 'var(--color-primary-green, #08d687)' : 'var(--main-border-color, #4e4e4e)'};
+                border-radius: 2rem;
+                padding: .1rem .75rem;
+                color: ${autoChestEnabled ? 'var(--color-primary-green, #08d687)' : 'var(--color-text, white)'};
+                font-size: .8rem;
+                font-weight: 600;
+                font-family: inherit;
                 cursor: pointer;
                 display: flex;
                 align-items: center;
                 gap: 4px;
+                outline: none;
             ">
                 <span>🎁</span>
-                <span>Auto Chest</span>
+                <span>Auto</span>
             </button>
             <div id="chest-threshold-controls" style="display: ${autoChestEnabled ? 'flex' : 'none'}; align-items: center; gap: 8px;">
-                <input id="chest-threshold-input" type="number" value="${autoChestThreshold || ''}" placeholder="likes" style="
-                    width: 60px;
-                    background: #333;
-                    border: 1px solid #555;
-                    border-radius: 4px;
-                    padding: 4px;
-                    color: white;
-                    font-size: 12px;
+                <input id="chest-threshold-input" type="number" value="${autoChestThreshold || ''}" placeholder="Likes" style="
+                    width: 70px;
+                    background: var(--background-color, #212121);
+                    border: 1px solid var(--main-border-color, #4e4e4e);
+                    border-radius: 2rem;
+                    padding: .1rem .75rem;
+                    color: var(--color-text, white);
+                    font-size: .8rem;
+                    font-weight: 600;
+                    font-family: inherit;
                     text-align: center;
-                " title="Threshold (likes)" />
+                    outline: none;
+                " title="Drop chest every X likes" />
                 <button id="chest-threshold-update" style="
-                    background: #3b82f6;
-                    border: none;
-                    border-radius: 4px;
-                    padding: 4px 8px;
-                    color: white;
-                    font-size: 12px;
+                    background: var(--background-color, #212121);
+                    border: 1px solid var(--main-border-color, #4e4e4e);
+                    border-radius: 2rem;
+                    padding: .1rem .75rem;
+                    color: var(--color-text, white);
+                    font-size: .8rem;
+                    font-weight: 600;
+                    font-family: inherit;
                     cursor: pointer;
-                ">Update</button>
+                    outline: none;
+                ">Set</button>
                 <span id="chest-update-status" style="
-                    color: #22c55e;
-                    font-size: 11px;
-                    width: 50px;
-                    text-align: left;
+                    color: var(--color-primary-green, #08d687);
+                    font-size: .75rem;
+                    font-weight: 600;
                 "></span>
             </div>
         </div>
@@ -129,7 +154,8 @@ function createChestControls() {
 
     toggleBtn.addEventListener('click', () => {
         autoChestEnabled = !autoChestEnabled;
-        toggleBtn.style.background = autoChestEnabled ? '#22c55e' : '#444';
+        toggleBtn.style.borderColor = autoChestEnabled ? 'var(--color-primary-green, #08d687)' : 'var(--main-border-color, #4e4e4e)';
+        toggleBtn.style.color = autoChestEnabled ? 'var(--color-primary-green, #08d687)' : 'var(--color-text, white)';
         thresholdControls.style.display = autoChestEnabled ? 'flex' : 'none';
 
         if (autoChestEnabled) {
