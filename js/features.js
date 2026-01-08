@@ -107,7 +107,7 @@ function createChestControls() {
                 <span>Auto</span>
             </button>
             <div id="chest-threshold-controls" style="display: ${autoChestEnabled ? 'flex' : 'none'}; align-items: center; gap: 8px;">
-                <input id="chest-threshold-input" type="number" value="${autoChestThreshold || ''}" placeholder="Likes" style="
+                <input id="chest-threshold-input" type="text" value="${autoChestThreshold ? autoChestThreshold.toLocaleString() : ''}" placeholder="Likes" style="
                     width: 70px;
                     background: var(--background-color, #212121);
                     border: 1px solid var(--main-border-color, #4e4e4e);
@@ -172,14 +172,28 @@ function createChestControls() {
     const updateBtn = document.getElementById('chest-threshold-update');
     const updateStatus = document.getElementById('chest-update-status');
 
+    // Format input with commas as user types
+    thresholdInput.addEventListener('input', () => {
+        // Strip non-digits, parse, and reformat
+        const raw = thresholdInput.value.replace(/[^\d]/g, '');
+        if (raw) {
+            const num = parseInt(raw);
+            thresholdInput.value = num.toLocaleString();
+        }
+    });
+
     updateBtn.addEventListener('click', () => {
-        const value = parseInt(thresholdInput.value);
+        // Strip commas before parsing
+        const value = parseInt(thresholdInput.value.replace(/,/g, ''));
         if (!isNaN(value) && value > 0) {
             autoChestThreshold = value;
             saveChestSettingsLocal();
 
+            // Reformat with commas
+            thresholdInput.value = value.toLocaleString();
+
             // Show status
-            updateStatus.textContent = 'Updated!';
+            updateStatus.textContent = 'Set!';
             setTimeout(() => {
                 updateStatus.textContent = '';
             }, 1500);
@@ -189,7 +203,7 @@ function createChestControls() {
             updateStatus.textContent = 'Invalid';
             setTimeout(() => {
                 updateStatus.textContent = '';
-                updateStatus.style.color = '#22c55e';
+                updateStatus.style.color = 'var(--color-primary-green, #08d687)';
             }, 1500);
         }
     });
