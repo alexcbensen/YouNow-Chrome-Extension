@@ -231,6 +231,19 @@ function loadChestSettingsLocal() {
 // Load chest settings on startup
 loadChestSettingsLocal();
 
+// Debug function for console access
+window.debugChest = function() {
+    console.log('Auto enabled:', autoChestEnabled);
+    console.log('Threshold:', autoChestThreshold);
+    console.log('Last chest likes:', lastChestOpenLikes);
+    console.log('Last checked:', lastCheckedLikes);
+    console.log('Current likes:', getCurrentLikesFromToolbar());
+    console.log('Is opening:', isOpeningChest);
+    console.log('Is dropping:', isChestDropping());
+    console.log('Is broadcasting:', isBroadcasting());
+    console.log('Chest count:', getCurrentLikesFromToolbar() - lastChestOpenLikes);
+};
+
 async function openChest(currentLikes) {
     isOpeningChest = true;
 
