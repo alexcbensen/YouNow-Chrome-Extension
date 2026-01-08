@@ -98,6 +98,12 @@ function applyFirebaseSettings() {
     if (firebaseSettings.friendSettings) {
         friendSettings = firebaseSettings.friendSettings;
     }
+    if (firebaseSettings.friendAvatars) {
+        friendAvatars = firebaseSettings.friendAvatars;
+    }
+    if (firebaseSettings.hiddenAvatars) {
+        hiddenAvatars = firebaseSettings.hiddenAvatars;
+    }
     if (firebaseSettings.myGradient) {
         myGradient = firebaseSettings.myGradient;
     }
@@ -269,8 +275,20 @@ async function saveSettingsToFirebase() {
             };
         }
 
+        // Convert friendAvatars object to Firestore map format
+        const friendAvatarsMap = {};
+        for (const [username, url] of Object.entries(friendAvatars)) {
+            friendAvatarsMap[username] = { stringValue: url };
+        }
+
+        // Convert hiddenAvatars object to Firestore map format
+        const hiddenAvatarsMap = {};
+        for (const [username, url] of Object.entries(hiddenAvatars)) {
+            hiddenAvatarsMap[username] = { stringValue: url };
+        }
+
         const response = await fetch(
-            `${FIRESTORE_BASE_URL}/config/settings?updateMask.fieldPaths=friendUsernames&updateMask.fieldPaths=hiddenBroadcasters&updateMask.fieldPaths=friendSettings`,
+            `${FIRESTORE_BASE_URL}/config/settings?updateMask.fieldPaths=friendUsernames&updateMask.fieldPaths=hiddenBroadcasters&updateMask.fieldPaths=friendSettings&updateMask.fieldPaths=friendAvatars&updateMask.fieldPaths=hiddenAvatars`,
             {
                 method: 'PATCH',
                 headers: {
@@ -292,6 +310,16 @@ async function saveSettingsToFirebase() {
                         friendSettings: {
                             mapValue: {
                                 fields: friendSettingsMap
+                            }
+                        },
+                        friendAvatars: {
+                            mapValue: {
+                                fields: friendAvatarsMap
+                            }
+                        },
+                        hiddenAvatars: {
+                            mapValue: {
+                                fields: hiddenAvatarsMap
                             }
                         }
                     }

@@ -21,6 +21,32 @@ function normalizeHex(value) {
     return value;
 }
 
+// Fetch avatar for a user from YouNow API
+async function fetchUserAvatar(username) {
+    if (friendAvatars[username.toLowerCase()]) return;
+
+    try {
+        const response = await fetch(`https://api.younow.com/php/api/broadcast/info/user=${username}`);
+        const data = await response.json();
+
+        if (data.profileUrlSmall) {
+            friendAvatars[username.toLowerCase()] = data.profileUrlSmall;
+        }
+    } catch (e) {
+        // Silently fail
+    }
+}
+
+// Fetch avatars for all friends who don't have one cached
+async function fetchMissingAvatars() {
+    const promises = friendUsernames
+        .filter(u => !friendAvatars[u.toLowerCase()])
+        .map(u => fetchUserAvatar(u));
+
+    await Promise.all(promises);
+    renderFriendUsernames();
+}
+
 async function verifyAdminUser() {
     if (verifiedAdmin !== null) return verifiedAdmin;
 
@@ -132,6 +158,9 @@ function openAdminPanel() {
     renderFriendUsernames();
     renderHiddenBroadcasters();
 
+    // Fetch missing avatars in background
+    fetchMissingAvatars();
+
     // Close button
     const closeBtn = document.getElementById('admin-panel-close');
     closeBtn.addEventListener('click', () => {
@@ -147,6 +176,49 @@ function openAdminPanel() {
         updateAdminIcon();
         document.body.style.overflow = '';
         overlay.remove();
+    });
+
+    // Refresh avatars button
+    const refreshBtn = document.getElementById('refresh-avatars-btn');
+    refreshBtn.addEventListener('click', async () => {
+        const statusEl = document.getElementById('admin-save-status');
+        statusEl.style.display = 'block';
+        statusEl.style.color = '#888';
+        statusEl.textContent = 'Refreshing avatars...';
+
+        let updated = 0;
+
+        // Refresh friend avatars
+        for (const username of friendUsernames) {
+            try {
+                const response = await fetch(`https://cdn.younow.com/php/api/channel/getInfo/user=${username}`);
+                const data = await response.json();
+                if (data.userId) {
+                    friendAvatars[username.toLowerCase()] = `https://ynassets.younow.com/user/live/${data.userId}/${data.userId}.jpg`;
+                    updated++;
+                }
+            } catch (e) {}
+        }
+
+        // Refresh hidden avatars
+        for (const username of hiddenBroadcasters) {
+            try {
+                const response = await fetch(`https://cdn.younow.com/php/api/channel/getInfo/user=${username}`);
+                const data = await response.json();
+                if (data.userId) {
+                    hiddenAvatars[username.toLowerCase()] = `https://ynassets.younow.com/user/live/${data.userId}/${data.userId}.jpg`;
+                    updated++;
+                }
+            } catch (e) {}
+        }
+
+        await saveSettingsToFirebase();
+        renderFriendUsernames();
+        renderHiddenBroadcasters();
+
+        statusEl.style.color = '#22c55e';
+        statusEl.textContent = `Updated ${updated} avatars!`;
+        setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
     });
 
     // Add friend username
@@ -168,10 +240,42 @@ function openAdminPanel() {
             return;
         }
 
-        friendUsernames.push(username);
-        renderFriendUsernames();
-        friendInput.value = '';
-        await saveSettingsToFirebase();
+        // Fetch user info from YouNow API
+        statusEl.style.display = 'block';
+        statusEl.style.color = '#888';
+        statusEl.textContent = 'Looking up user...';
+
+        try {
+            const response = await fetch(`https://cdn.younow.com/php/api/channel/getInfo/user=${username}`);
+            const data = await response.json();
+
+            // Only fail if there's no userId at all
+            if (!data.userId) {
+                statusEl.style.color = '#ef4444';
+                statusEl.textContent = `User "${username}" not found`;
+                setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
+                return;
+            }
+
+            // Use the correct capitalization from API
+            const correctUsername = data.profile || username;
+            // Construct profile image URL from userId
+            const profileImage = `https://ynassets.younow.com/user/live/${data.userId}/${data.userId}.jpg`;
+
+            // Store profile image in friendAvatars
+            friendAvatars[correctUsername.toLowerCase()] = profileImage;
+
+            friendUsernames.push(correctUsername);
+            renderFriendUsernames();
+            friendInput.value = '';
+            await saveSettingsToFirebase();
+
+            statusEl.style.display = 'none';
+        } catch (error) {
+            statusEl.style.color = '#ef4444';
+            statusEl.textContent = 'Error looking up user';
+            setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
+        }
     });
     friendInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') addFriendBtn.click();
@@ -196,10 +300,42 @@ function openAdminPanel() {
             return;
         }
 
-        hiddenBroadcasters.push(username);
-        renderHiddenBroadcasters();
-        hiddenInput.value = '';
-        await saveSettingsToFirebase();
+        // Fetch user info from YouNow API
+        statusEl.style.display = 'block';
+        statusEl.style.color = '#888';
+        statusEl.textContent = 'Looking up user...';
+
+        try {
+            const response = await fetch(`https://cdn.younow.com/php/api/channel/getInfo/user=${username}`);
+            const data = await response.json();
+
+            // Only fail if there's no userId at all
+            if (!data.userId) {
+                statusEl.style.color = '#ef4444';
+                statusEl.textContent = `User "${username}" not found`;
+                setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
+                return;
+            }
+
+            // Use the correct capitalization from API
+            const correctUsername = data.profile || username;
+            // Construct profile image URL from userId
+            const profileImage = `https://ynassets.younow.com/user/live/${data.userId}/${data.userId}.jpg`;
+
+            // Store profile image in hiddenAvatars
+            hiddenAvatars[correctUsername.toLowerCase()] = profileImage;
+
+            hiddenBroadcasters.push(correctUsername);
+            renderHiddenBroadcasters();
+            hiddenInput.value = '';
+            await saveSettingsToFirebase();
+
+            statusEl.style.display = 'none';
+        } catch (error) {
+            statusEl.style.color = '#ef4444';
+            statusEl.textContent = 'Error looking up user';
+            setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
+        }
     });
     hiddenInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') addHiddenBtn.click();
@@ -220,6 +356,7 @@ function renderFriendUsernames() {
 
     container.innerHTML = friendUsernames.map((username, index) => {
         const settings = friendSettings[username.toLowerCase()] || {};
+        const avatar = friendAvatars[username.toLowerCase()] || '';
         return `
         <div style="
             display: flex;
@@ -230,7 +367,16 @@ function renderFriendUsernames() {
             padding: 8px 12px;
             margin-bottom: 6px;
         ">
-            <span style="color: white;">${username}</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="${avatar}" alt="" style="
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    background: #444;
+                    display: ${avatar ? 'block' : 'none'};
+                " onerror="this.style.display='none'" />
+                <span style="color: white;">${username}</span>
+            </div>
             <div style="display: flex; gap: 6px;">
                 <button data-settings-friend="${username}" title="Style settings" style="
                     background: #3b82f6;
@@ -299,27 +445,6 @@ function renderFriendUsernames() {
                         border: 1px solid #555;
                     "></div>
                 </div>
-                <!-- Text color settings -->
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="text-enabled-${username.toLowerCase()}" ${settings.textColor ? 'checked' : ''} style="cursor: pointer;" />
-                    <label style="color: #ccc; font-size: 13px; width: 60px;">Name:</label>
-                    <input type="text" id="text-color-${username.toLowerCase()}" value="${settings.textColor || ''}" placeholder="#hex" style="
-                        width: 70px;
-                        background: #2a2a2a;
-                        border: 1px solid #444;
-                        border-radius: 4px;
-                        padding: 4px 8px;
-                        color: white;
-                        font-size: 12px;
-                    " />
-                    <div id="text-preview-${username.toLowerCase()}" style="
-                        width: 18px;
-                        height: 18px;
-                        border-radius: 4px;
-                        background: ${settings.textColor || '#333'};
-                        border: 1px solid #555;
-                    "></div>
-                </div>
                 <!-- Level background settings -->
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <input type="checkbox" id="level-enabled-${username.toLowerCase()}" ${settings.levelEnabled ? 'checked' : ''} style="cursor: pointer;" />
@@ -354,6 +479,27 @@ function renderFriendUsernames() {
                         height: 18px;
                         border-radius: 4px;
                         background: ${settings.levelColor2 || '#333'};
+                        border: 1px solid #555;
+                    "></div>
+                </div>
+                <!-- Text color settings -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="text-enabled-${username.toLowerCase()}" ${settings.textColor ? 'checked' : ''} style="cursor: pointer;" />
+                    <label style="color: #ccc; font-size: 13px; width: 60px;">Name:</label>
+                    <input type="text" id="text-color-${username.toLowerCase()}" value="${settings.textColor || ''}" placeholder="#hex" style="
+                        width: 70px;
+                        background: #2a2a2a;
+                        border: 1px solid #444;
+                        border-radius: 4px;
+                        padding: 4px 8px;
+                        color: white;
+                        font-size: 12px;
+                    " />
+                    <div id="text-preview-${username.toLowerCase()}" style="
+                        width: 18px;
+                        height: 18px;
+                        border-radius: 4px;
+                        background: ${settings.textColor || '#333'};
                         border: 1px solid #555;
                     "></div>
                 </div>
@@ -447,7 +593,9 @@ function renderHiddenBroadcasters() {
     const container = document.getElementById('hidden-broadcasters-list');
     if (!container) return;
 
-    container.innerHTML = hiddenBroadcasters.map((username, index) => `
+    container.innerHTML = hiddenBroadcasters.map((username, index) => {
+        const avatar = hiddenAvatars[username.toLowerCase()] || '';
+        return `
         <div style="
             display: flex;
             align-items: center;
@@ -457,7 +605,16 @@ function renderHiddenBroadcasters() {
             padding: 8px 12px;
             margin-bottom: 6px;
         ">
-            <span style="color: white;">${username}</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="${avatar}" alt="" style="
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    background: #444;
+                    display: ${avatar ? 'block' : 'none'};
+                " onerror="this.style.display='none'" />
+                <span style="color: white;">${username}</span>
+            </div>
             <button data-remove-hidden="${index}" style="
                 background: #ef4444;
                 border: none;
@@ -468,13 +625,16 @@ function renderHiddenBroadcasters() {
                 cursor: pointer;
             ">Remove</button>
         </div>
-    `).join('');
+    `}).join('');
 
     // Add click handlers for remove buttons
     container.querySelectorAll('[data-remove-hidden]').forEach(btn => {
         btn.addEventListener('click', async () => {
             const index = parseInt(btn.getAttribute('data-remove-hidden'));
+            const username = hiddenBroadcasters[index];
             hiddenBroadcasters.splice(index, 1);
+            // Also remove avatar for this user
+            delete hiddenAvatars[username.toLowerCase()];
             renderHiddenBroadcasters();
             await saveSettingsToFirebase();
         });

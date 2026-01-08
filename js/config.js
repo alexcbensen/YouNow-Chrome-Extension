@@ -20,6 +20,13 @@ let hiddenBroadcasters = [];
 // Format: { "username": { borderEnabled: true, borderColor1: "#ff0000", borderColor2: "#0000ff", textColor: "#ffffff", levelEnabled: true, levelColor1: "#00ff00", levelColor2: "#00ff00" } }
 let friendSettings = {};
 
+// Friend avatars - profile pictures from YouNow API
+// Format: { "username": "https://..." }
+let friendAvatars = {};
+
+// Hidden broadcaster avatars
+let hiddenAvatars = {};
+
 // Gradient definitions (loaded from Firebase)
 let myGradient = "";
 let myTextColor = "";
