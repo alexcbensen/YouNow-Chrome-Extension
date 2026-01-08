@@ -11,6 +11,7 @@
 
 // Create debug function that logs current state
 function runDebugFriends() {
+    console.log('currentUserId:', currentUserId);
     console.log('friendUserIds:', friendUserIds);
     console.log('friendUsers:', friendUsers);
     console.log('friendSettings:', friendSettings);
