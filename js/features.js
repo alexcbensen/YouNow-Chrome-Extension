@@ -43,6 +43,13 @@ function createChestControls() {
     if (!isBroadcasting()) return;
     if (document.getElementById('auto-chest-controls')) return;
 
+    // Don't show for Alex account (ID: 60578594)
+    const profileLink = document.querySelector('app-profile-dropdown a[href*="/profile/"]');
+    if (profileLink) {
+        const match = profileLink.href.match(/\/profile\/(\d+)/);
+        if (match && match[1] === '60578594') return;
+    }
+
     const toolbar = document.querySelector('.toolbar__left');
     if (!toolbar) return;
 
