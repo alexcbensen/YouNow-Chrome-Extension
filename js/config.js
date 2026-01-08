@@ -1,3 +1,5 @@
+const EXCLUDED_FROM_AUTO_CHEST = ["alex"]; // Excluded usernames (lowercase)
+
 // Admin settings
 const ADMIN_USER_IDS = ["60578594", "60974148"];
 
