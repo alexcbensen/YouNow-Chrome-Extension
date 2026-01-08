@@ -425,7 +425,7 @@ function applyBorders() {
 
                     // Use gradient if two colors provided, otherwise solid color
                     if (settings.borderColor2) {
-                        card.style.backgroundImage = `linear-gradient(#212121, #212121), linear-gradient(135deg, ${settings.borderColor1}, ${settings.borderColor2})`;
+                        card.style.backgroundImage = `linear-gradient(#212121, #212121), linear-gradient(115.62deg, ${settings.borderColor1} 17.43%, ${settings.borderColor2} 84.33%)`;
                         card.style.backgroundOrigin = 'border-box';
                         card.style.backgroundClip = 'padding-box, border-box';
                     } else {
@@ -455,7 +455,7 @@ function applyBorders() {
                     if (levelBadge) {
                         // Use gradient if two colors provided, otherwise solid color
                         if (settings.levelColor2) {
-                            levelBadge.style.background = `linear-gradient(135deg, ${settings.levelColor1}, ${settings.levelColor2})`;
+                            levelBadge.style.background = `linear-gradient(115.62deg, ${settings.levelColor1} 17.43%, ${settings.levelColor2} 84.33%)`;
                         } else {
                             levelBadge.style.background = settings.levelColor1;
                         }
