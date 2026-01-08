@@ -54,6 +54,9 @@ function createChestControls() {
     // Don't show on excluded pages
     if (EXCLUDED_FROM_AUTO_CHEST.some(name => window.location.pathname.toLowerCase() === '/' + name)) return;
 
+    // Don't show if user doesn't have a chest
+    if (!document.querySelector('.chest-button')) return;
+
     const toolbar = document.querySelector('.toolbar__left');
     if (!toolbar) return;
 
