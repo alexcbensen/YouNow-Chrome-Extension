@@ -47,11 +47,34 @@ setTimeout(applyBorders, 3000);
 
 setInterval(createGridToggle, 1000);
 setInterval(applyGridView, 1000);
-setInterval(fixVideoFit, 1000);
 setInterval(hideCarouselBroadcasters, 200);
 setInterval(checkBroadcastStatus, 1000);
 
 // ============ Observers ============
+
+// Watch for video elements to apply fixVideoFit
+const videoObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+        if (mutation.type === 'childList') {
+            const hasVideoChanges = mutation.addedNodes.length > 0 &&
+                Array.from(mutation.addedNodes).some(node =>
+                    node.nodeType === 1 && (node.tagName === 'VIDEO' || node.querySelector?.('video'))
+                );
+            if (hasVideoChanges) {
+                fixVideoFit();
+                break;
+            }
+        }
+        if (mutation.type === 'attributes' && mutation.target.tagName === 'VIDEO') {
+            fixVideoFit();
+            break;
+        }
+    }
+});
+videoObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+
+// Run once on load
+fixVideoFit();
 
 // Watch for DOM changes to hide broadcasters
 const broadcasterObserver = new MutationObserver(() => {

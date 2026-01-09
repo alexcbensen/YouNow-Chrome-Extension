@@ -34,10 +34,39 @@ app-chat .user-card__body {
 }
 
 .grid-view-enabled app-channel .fullscreen-wrapper > .video .video-wrapper,
-.grid-view-enabled app-channel .fullscreen-wrapper > .video app-video,
+.grid-view-enabled app-channel .fullscreen-wrapper > .video app-video {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Force cover for regular videos in grid view */
+.grid-view-enabled app-channel .fullscreen-wrapper > .video video:not(.is-screenshare) {
+    object-fit: cover !important;
+}
+
+/* Screenshare videos use contain to show full content */
+.grid-view-enabled app-channel .fullscreen-wrapper > .video video.is-screenshare {
+    object-fit: contain !important;
+}
+
+/* Main video wrapper - full size by default in grid */
 .grid-view-enabled app-channel .fullscreen-wrapper > .video .main-video-wrapper {
     width: 100% !important;
     height: 100% !important;
+}
+
+/* When screenshare is active: position camera feed as small PiP overlay */
+.grid-view-enabled app-channel .fullscreen-wrapper > .video:has(video.is-screenshare) .main-video-wrapper {
+    position: absolute !important;
+    bottom: 10px !important;
+    right: 10px !important;
+    width: 30% !important;
+    min-width: 100px !important;
+    max-width: 180px !important;
+    height: auto !important;
+    z-index: 10 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
 }
 
 /* Rounded corners for all videos */

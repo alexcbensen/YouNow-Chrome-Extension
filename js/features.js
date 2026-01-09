@@ -571,13 +571,27 @@ function applyGridView() {
 }
 
 function fixVideoFit() {
+    const isGridView = document.body.classList.contains('grid-view-enabled');
     const allVideos = document.querySelectorAll('.video-player video');
 
     allVideos.forEach(video => {
+        const videoTile = video.closest('.video');
+
         if (video.classList.contains('is-screenshare')) {
             video.style.objectFit = 'contain';
+        } else if (isGridView) {
+            // In grid view: show full frame and adjust container
+            video.style.objectFit = 'contain';
+            if (videoTile && video.videoWidth && video.videoHeight) {
+                const aspectRatio = video.videoWidth / video.videoHeight;
+                videoTile.style.aspectRatio = aspectRatio.toString();
+            }
         } else {
+            // Normal view: use cover (YouNow default behavior)
             video.style.objectFit = 'cover';
+            if (videoTile) {
+                videoTile.style.aspectRatio = '';
+            }
         }
     });
 }
@@ -739,12 +753,12 @@ function createGlobalVolumeSlider() {
         // Create label (plain text, positioned above on hover)
         const label = document.createElement('span');
         label.className = 'betternow-volume-label';
-        label.textContent = 'Overall Volume';
+        label.textContent = 'Stream Volume';
         label.style.cssText = 'position: fixed; font-size: 0.75rem; font-weight: 500; color: var(--color-text, #fff); white-space: nowrap; pointer-events: none; z-index: 9999; display: none;';
 
         const volumeContent = document.createElement('div');
         volumeContent.className = 'volume toolbar__content';
-        volumeContent.style.cssText = 'display: flex; align-items: center; gap: 0; padding: 4px 8px;';
+        volumeContent.style.cssText = 'display: flex; align-items: center; gap: 0; padding: 4px 0 4px 8px;';
 
         const sliderContainer = document.createElement('div');
         sliderContainer.className = 'volume__range';
