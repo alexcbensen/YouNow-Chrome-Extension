@@ -18,7 +18,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["assets/golden-border-2.svg"],
+      "resources": ["assets/golden-border-2.svg", "js/filter-bypass.js"],
       "matches": ["https://www.younow.com/*", "https://younow.com/*"]
     }
   ]
