@@ -104,7 +104,8 @@ function createChestControls() {
         ">AUTO CHEST</button>
         <div id="chest-threshold-controls" style="display: none; align-items: center; gap: 8px;">
             <input id="chest-threshold-input" type="text" value="${autoChestThreshold ? autoChestThreshold.toLocaleString() : ''}" placeholder="Likes" style="
-                width: 70px;
+                min-width: 70px;
+                width: auto;
                 background: var(--background-color, #212121);
                 border: 1px solid var(--main-border-color, #4e4e4e);
                 border-radius: 2rem;
@@ -115,8 +116,9 @@ function createChestControls() {
                 font-family: inherit;
                 text-align: center;
                 outline: none;
-            " title="Drop chest every X likes" />
+            " title="Drop chest every X likes (supports K and M suffixes)" />
             <button id="chest-threshold-update" style="
+                display: none;
                 background: var(--color-mediumgray, #888);
                 border: none;
                 border-radius: 2rem;
@@ -169,15 +171,66 @@ function createChestControls() {
     const updateBtn = document.getElementById('chest-threshold-update');
     const updateStatus = document.getElementById('chest-update-status');
 
-    // Format input with commas as user types
+    // Store the last saved value to detect changes
+    let lastSavedValue = autoChestThreshold ? autoChestThreshold.toLocaleString() : '';
+
+    // Clear input when focused
+    thresholdInput.addEventListener('focus', () => {
+        thresholdInput.value = '';
+        thresholdInput.style.width = '70px';
+        updateBtn.style.display = 'none';
+    });
+
+    // Format input with commas as user types, support K/M suffixes
     thresholdInput.addEventListener('input', () => {
-        // Strip non-digits, parse, and reformat
-        const raw = thresholdInput.value.replace(/[^\d]/g, '');
-        if (raw) {
-            const num = parseInt(raw);
+        let raw = thresholdInput.value.trim();
+
+        // Check for K or M suffix
+        const upperRaw = raw.toUpperCase();
+        let multiplier = 1;
+        if (upperRaw.endsWith('K')) {
+            multiplier = 1000;
+            raw = raw.slice(0, -1);
+        } else if (upperRaw.endsWith('M')) {
+            multiplier = 1000000;
+            raw = raw.slice(0, -1);
+        }
+
+        // Strip non-digits and parse
+        const digits = raw.replace(/[^\d]/g, '');
+        if (digits) {
+            const num = parseInt(digits) * multiplier;
             thresholdInput.value = num.toLocaleString();
         }
+
+        // Auto-resize input based on content
+        const tempSpan = document.createElement('span');
+        tempSpan.style.cssText = 'font-size: .8rem; font-weight: 600; font-family: inherit; visibility: hidden; position: absolute;';
+        tempSpan.textContent = thresholdInput.value || thresholdInput.placeholder;
+        document.body.appendChild(tempSpan);
+        const newWidth = Math.max(70, tempSpan.offsetWidth + 30);
+        thresholdInput.style.width = newWidth + 'px';
+        tempSpan.remove();
+
+        // Show/hide Set button based on whether value has changed
+        if (thresholdInput.value !== lastSavedValue && thresholdInput.value !== '') {
+            updateBtn.style.display = 'inline-block';
+        } else {
+            updateBtn.style.display = 'none';
+        }
     });
+
+    // Trigger resize on initial load if there's a value
+    if (thresholdInput.value) {
+        // Just resize, don't show button
+        const tempSpan = document.createElement('span');
+        tempSpan.style.cssText = 'font-size: .8rem; font-weight: 600; font-family: inherit; visibility: hidden; position: absolute;';
+        tempSpan.textContent = thresholdInput.value;
+        document.body.appendChild(tempSpan);
+        const newWidth = Math.max(70, tempSpan.offsetWidth + 30);
+        thresholdInput.style.width = newWidth + 'px';
+        tempSpan.remove();
+    }
 
     updateBtn.addEventListener('click', () => {
         // Strip commas before parsing
@@ -188,6 +241,10 @@ function createChestControls() {
 
             // Reformat with commas
             thresholdInput.value = value.toLocaleString();
+
+            // Update last saved value and hide Set button
+            lastSavedValue = thresholdInput.value;
+            updateBtn.style.display = 'none';
 
             // Flash green then back to grey
             updateBtn.style.background = 'var(--color-primary-green, #08d687)';
