@@ -263,6 +263,134 @@ function openAdminPanel() {
         hiddenArrow.textContent = isHidden ? '▼' : '▶';
     });
 
+    // My Settings toggle
+    const mySettingsToggle = document.getElementById('my-settings-toggle');
+    const mySettingsContent = document.getElementById('my-settings-content');
+    const mySettingsArrow = document.getElementById('my-settings-arrow');
+
+    if (mySettingsToggle && mySettingsContent && mySettingsArrow) {
+        mySettingsToggle.addEventListener('click', () => {
+            const isHidden = mySettingsContent.style.display === 'none';
+            mySettingsContent.style.display = isHidden ? 'block' : 'none';
+            mySettingsArrow.textContent = isHidden ? '▼' : '▶';
+        });
+
+        // Populate my settings fields
+        document.getElementById('my-border-enabled').checked = mySettings.borderEnabled || false;
+        document.getElementById('my-border-color1').value = mySettings.borderColor1 || '';
+        document.getElementById('my-border-color2').value = mySettings.borderColor2 || '';
+        document.getElementById('my-text-enabled').checked = !!mySettings.textColor;
+        document.getElementById('my-text-color').value = mySettings.textColor || '';
+        document.getElementById('my-level-enabled').checked = mySettings.levelEnabled || false;
+        document.getElementById('my-level-color1').value = mySettings.levelColor1 || '';
+        document.getElementById('my-level-color2').value = mySettings.levelColor2 || '';
+        document.getElementById('my-frame-enabled').checked = mySettings.frameEnabled || false;
+        document.getElementById('my-frame-url').value = mySettings.frameUrl || '';
+
+        // Update color previews
+        const updateMyPreview = (inputId, previewId) => {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            if (input && preview) {
+                const value = normalizeHex(input.value);
+                if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+                    preview.style.background = value;
+                }
+                input.addEventListener('input', () => {
+                    const val = normalizeHex(input.value);
+                    if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                        preview.style.background = val;
+                    }
+                });
+            }
+        };
+
+        updateMyPreview('my-border-color1', 'my-border-preview1');
+        updateMyPreview('my-border-color2', 'my-border-preview2');
+        updateMyPreview('my-text-color', 'my-text-preview');
+        updateMyPreview('my-level-color1', 'my-level-preview1');
+        updateMyPreview('my-level-color2', 'my-level-preview2');
+
+        // Frame preview handling
+        const frameUrlInput = document.getElementById('my-frame-url');
+        const framePreview = document.getElementById('my-frame-preview');
+        const framePreviewImg = document.getElementById('my-frame-preview-img');
+
+        const showFramePreview = (url) => {
+            if (url) {
+                framePreviewImg.src = url;
+                framePreview.style.display = 'flex';
+                framePreview.dataset.frameUrl = url;
+                frameUrlInput.style.display = 'none';
+            } else {
+                framePreview.style.display = 'none';
+                frameUrlInput.style.display = 'block';
+            }
+        };
+
+        // Initialize frame preview if we have a URL
+        if (mySettings.frameUrl) {
+            showFramePreview(mySettings.frameUrl);
+        }
+
+        // Listen for paste/input on frame URL
+        frameUrlInput.addEventListener('input', () => {
+            const url = frameUrlInput.value.trim();
+            if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+                // Store the URL in data attribute and show preview
+                framePreview.dataset.frameUrl = url;
+                showFramePreview(url);
+                frameUrlInput.value = '';
+            }
+        });
+
+        // Click on preview to change
+        framePreview.addEventListener('click', () => {
+            framePreview.style.display = 'none';
+            frameUrlInput.style.display = 'block';
+            frameUrlInput.focus();
+        });
+
+        // Save my settings button
+        document.getElementById('save-my-settings').addEventListener('click', async () => {
+            const btn = document.getElementById('save-my-settings');
+
+            const borderEnabled = document.getElementById('my-border-enabled').checked;
+            const borderColor1 = normalizeHex(document.getElementById('my-border-color1').value.trim());
+            const borderColor2 = normalizeHex(document.getElementById('my-border-color2').value.trim());
+            const textEnabled = document.getElementById('my-text-enabled').checked;
+            const textColor = normalizeHex(document.getElementById('my-text-color').value.trim());
+            const levelEnabled = document.getElementById('my-level-enabled').checked;
+            const levelColor1 = normalizeHex(document.getElementById('my-level-color1').value.trim());
+            const levelColor2 = normalizeHex(document.getElementById('my-level-color2').value.trim());
+            const frameEnabled = document.getElementById('my-frame-enabled').checked;
+
+            // Get frame URL from preview data attribute, or input, or existing settings
+            const framePreview = document.getElementById('my-frame-preview');
+            const frameUrlInput = document.getElementById('my-frame-url');
+            const frameUrl = framePreview.dataset.frameUrl || frameUrlInput.value.trim() || mySettings.frameUrl || '';
+
+            mySettings = {
+                borderEnabled: borderEnabled,
+                borderColor1: borderEnabled ? borderColor1 : '',
+                borderColor2: borderEnabled ? borderColor2 : '',
+                textColor: textEnabled ? textColor : '',
+                levelEnabled: levelEnabled,
+                levelColor1: levelEnabled ? levelColor1 : '',
+                levelColor2: levelEnabled ? levelColor2 : '',
+                frameEnabled: frameEnabled,
+                frameUrl: frameEnabled ? frameUrl : ''
+            };
+
+            await saveSettingsToFirebase();
+            applyBorders();
+
+            // Visual feedback
+            btn.textContent = 'Saved!';
+            setTimeout(() => { btn.textContent = 'Save My Style'; }, 1000);
+        });
+    }
+
     // Close button
     const closeBtn = document.getElementById('admin-panel-close');
     closeBtn.addEventListener('click', () => {

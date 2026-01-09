@@ -459,10 +459,13 @@ function applyBorders() {
         const li = span.closest('li');
         if (li && li.closest('app-chat-list')) {
             const card = li.querySelector('.user-card');
-            if (card) {
+            if (card && mySettings.borderEnabled && mySettings.borderColor1) {
+                const gradient = mySettings.borderColor2
+                    ? `linear-gradient(135deg, ${mySettings.borderColor1}, ${mySettings.borderColor2})`
+                    : mySettings.borderColor1;
                 card.style.border = '1px solid transparent';
                 card.style.borderRadius = '8px';
-                card.style.backgroundImage = `linear-gradient(#212121, #212121), ${myGradient}`;
+                card.style.backgroundImage = `linear-gradient(#212121, #212121), ${gradient}`;
                 card.style.backgroundOrigin = 'border-box';
                 card.style.backgroundClip = 'padding-box, border-box';
             }
@@ -473,24 +476,27 @@ function applyBorders() {
             }
 
             const levelBadge = li.querySelector('app-user-level .user-level');
-            if (levelBadge) {
-                levelBadge.style.background = myGradient;
+            if (levelBadge && mySettings.levelEnabled && mySettings.levelColor1) {
+                const levelGradient = mySettings.levelColor2
+                    ? `linear-gradient(135deg, ${mySettings.levelColor1}, ${mySettings.levelColor2})`
+                    : mySettings.levelColor1;
+                levelBadge.style.background = levelGradient;
                 levelBadge.style.borderRadius = '9px';
                 levelBadge.style.padding = '.125rem .5rem';
                 levelBadge.style.color = '#fff';
             }
 
             const usernameSpan = li.querySelector(`span[title="${myUsername}"]`);
-            if (usernameSpan) {
-                usernameSpan.style.setProperty('color', myTextColor, 'important');
+            if (usernameSpan && mySettings.textColor) {
+                usernameSpan.style.setProperty('color', mySettings.textColor, 'important');
             }
 
             const avatarThumb = li.querySelector('app-user-thumb .user-thumb');
-            if (avatarThumb) {
+            if (avatarThumb && mySettings.frameEnabled && mySettings.frameUrl) {
                 const existingBorder = avatarThumb.querySelector('.custom-avatar-border');
                 if (!existingBorder) {
                     const borderImg = document.createElement('img');
-                    borderImg.src = chrome.runtime.getURL('assets/golden-border-2.svg');
+                    borderImg.src = mySettings.frameUrl;
                     borderImg.className = 'custom-avatar-border';
                     borderImg.style.cssText = `
                         position: absolute;

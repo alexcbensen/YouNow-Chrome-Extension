@@ -59,6 +59,158 @@ const templates = {
                     </div>
                 </div>
                 
+                <!-- My Settings Section -->
+                <div style="margin-bottom: 24px;">
+                    <h3 id="my-settings-toggle" style="color: white; margin: 0 0 12px 0; font-size: 16px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <span id="my-settings-arrow" style="font-size: 12px;">▶</span>
+                        My Chat Style
+                    </h3>
+                    <div id="my-settings-content" style="display: none;">
+                        <div id="my-settings-panel" style="
+                            background: #333;
+                            border-radius: 6px;
+                            padding: 12px;
+                            margin-bottom: 8px;
+                        ">
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <!-- Border settings -->
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="my-border-enabled" style="cursor: pointer;" />
+                                    <label style="color: #ccc; font-size: 13px; width: 60px;">Border:</label>
+                                    <input type="text" id="my-border-color1" placeholder="#hex" style="
+                                        width: 70px;
+                                        background: #2a2a2a;
+                                        border: 1px solid #444;
+                                        border-radius: 4px;
+                                        padding: 4px 8px;
+                                        color: white;
+                                        font-size: 12px;
+                                    " />
+                                    <div id="my-border-preview1" style="
+                                        width: 18px;
+                                        height: 18px;
+                                        border-radius: 4px;
+                                        background: #333;
+                                        border: 1px solid #555;
+                                    "></div>
+                                    <input type="text" id="my-border-color2" placeholder="#hex (optional)" style="
+                                        width: 70px;
+                                        background: #2a2a2a;
+                                        border: 1px solid #444;
+                                        border-radius: 4px;
+                                        padding: 4px 8px;
+                                        color: white;
+                                        font-size: 12px;
+                                    " />
+                                    <div id="my-border-preview2" style="
+                                        width: 18px;
+                                        height: 18px;
+                                        border-radius: 4px;
+                                        background: #333;
+                                        border: 1px solid #555;
+                                    "></div>
+                                </div>
+                                <!-- Text color settings -->
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="my-text-enabled" style="cursor: pointer;" />
+                                    <label style="color: #ccc; font-size: 13px; width: 60px;">Text:</label>
+                                    <input type="text" id="my-text-color" placeholder="#hex" style="
+                                        width: 70px;
+                                        background: #2a2a2a;
+                                        border: 1px solid #444;
+                                        border-radius: 4px;
+                                        padding: 4px 8px;
+                                        color: white;
+                                        font-size: 12px;
+                                    " />
+                                    <div id="my-text-preview" style="
+                                        width: 18px;
+                                        height: 18px;
+                                        border-radius: 4px;
+                                        background: #333;
+                                        border: 1px solid #555;
+                                    "></div>
+                                </div>
+                                <!-- Level badge settings -->
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="my-level-enabled" style="cursor: pointer;" />
+                                    <label style="color: #ccc; font-size: 13px; width: 60px;">Level:</label>
+                                    <input type="text" id="my-level-color1" placeholder="#hex" style="
+                                        width: 70px;
+                                        background: #2a2a2a;
+                                        border: 1px solid #444;
+                                        border-radius: 4px;
+                                        padding: 4px 8px;
+                                        color: white;
+                                        font-size: 12px;
+                                    " />
+                                    <div id="my-level-preview1" style="
+                                        width: 18px;
+                                        height: 18px;
+                                        border-radius: 4px;
+                                        background: #333;
+                                        border: 1px solid #555;
+                                    "></div>
+                                    <input type="text" id="my-level-color2" placeholder="#hex (optional)" style="
+                                        width: 70px;
+                                        background: #2a2a2a;
+                                        border: 1px solid #444;
+                                        border-radius: 4px;
+                                        padding: 4px 8px;
+                                        color: white;
+                                        font-size: 12px;
+                                    " />
+                                    <div id="my-level-preview2" style="
+                                        width: 18px;
+                                        height: 18px;
+                                        border-radius: 4px;
+                                        background: #333;
+                                        border: 1px solid #555;
+                                    "></div>
+                                </div>
+                                <!-- Avatar frame settings -->
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="my-frame-enabled" style="cursor: pointer;" />
+                                    <label style="color: #ccc; font-size: 13px; width: 60px;">Frame:</label>
+                                    <input type="text" id="my-frame-url" placeholder="Paste image URL" style="
+                                        flex: 1;
+                                        background: #2a2a2a;
+                                        border: 1px solid #444;
+                                        border-radius: 4px;
+                                        padding: 4px 8px;
+                                        color: white;
+                                        font-size: 12px;
+                                    " />
+                                    <div id="my-frame-preview" style="
+                                        width: 32px;
+                                        height: 32px;
+                                        border-radius: 4px;
+                                        background: #2a2a2a;
+                                        border: 1px solid #555;
+                                        display: none;
+                                        align-items: center;
+                                        justify-content: center;
+                                        overflow: hidden;
+                                        cursor: pointer;
+                                    " title="Click to change">
+                                        <img id="my-frame-preview-img" style="width: 100%; height: 100%; object-fit: contain;" />
+                                    </div>
+                                </div>
+                                <button id="save-my-settings" style="
+                                    background: #22c55e;
+                                    border: none;
+                                    border-radius: 4px;
+                                    padding: 6px 12px;
+                                    color: white;
+                                    font-size: 12px;
+                                    cursor: pointer;
+                                    align-self: flex-end;
+                                ">Save My Style</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Hidden Broadcasters Section -->
                 <div style="margin-bottom: 24px;">
                     <h3 id="hidden-broadcasters-toggle" style="color: white; margin: 0 0 12px 0; font-size: 16px; cursor: pointer; display: flex; align-items: center; gap: 8px;">

@@ -109,11 +109,8 @@ function applyFirebaseSettings() {
     if (firebaseSettings.grantedFeatures) {
         grantedFeatures = firebaseSettings.grantedFeatures;
     }
-    if (firebaseSettings.myGradient) {
-        myGradient = firebaseSettings.myGradient;
-    }
-    if (firebaseSettings.myTextColor) {
-        myTextColor = firebaseSettings.myTextColor;
+    if (firebaseSettings.mySettings) {
+        mySettings = firebaseSettings.mySettings;
     }
 
     // Re-apply borders with new settings
@@ -340,7 +337,7 @@ async function saveSettingsToFirebase() {
         }
 
         const response = await fetch(
-            `${FIRESTORE_BASE_URL}/config/settings?updateMask.fieldPaths=friendUserIds&updateMask.fieldPaths=hiddenUserIds&updateMask.fieldPaths=friendUsers&updateMask.fieldPaths=hiddenUsers&updateMask.fieldPaths=hiddenExceptions&updateMask.fieldPaths=friendSettings&updateMask.fieldPaths=grantedFeatures`,
+            `${FIRESTORE_BASE_URL}/config/settings?updateMask.fieldPaths=friendUserIds&updateMask.fieldPaths=hiddenUserIds&updateMask.fieldPaths=friendUsers&updateMask.fieldPaths=hiddenUsers&updateMask.fieldPaths=hiddenExceptions&updateMask.fieldPaths=friendSettings&updateMask.fieldPaths=grantedFeatures&updateMask.fieldPaths=mySettings`,
             {
                 method: 'PATCH',
                 headers: {
@@ -382,6 +379,21 @@ async function saveSettingsToFirebase() {
                         grantedFeatures: {
                             mapValue: {
                                 fields: grantedFeaturesMap
+                            }
+                        },
+                        mySettings: {
+                            mapValue: {
+                                fields: {
+                                    borderEnabled: { booleanValue: mySettings.borderEnabled || false },
+                                    borderColor1: { stringValue: mySettings.borderColor1 || '' },
+                                    borderColor2: { stringValue: mySettings.borderColor2 || '' },
+                                    textColor: { stringValue: mySettings.textColor || '' },
+                                    levelEnabled: { booleanValue: mySettings.levelEnabled || false },
+                                    levelColor1: { stringValue: mySettings.levelColor1 || '' },
+                                    levelColor2: { stringValue: mySettings.levelColor2 || '' },
+                                    frameEnabled: { booleanValue: mySettings.frameEnabled || false },
+                                    frameUrl: { stringValue: mySettings.frameUrl || '' }
+                                }
                             }
                         }
                     }
