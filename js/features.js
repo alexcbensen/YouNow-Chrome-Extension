@@ -33,7 +33,11 @@ function parseDisplayLikes(text) {
 }
 
 function getCurrentLikesFromToolbar() {
-    const likeIcon = document.querySelector('.toolbar .ynicon-like');
+    // Find the likes in toolbar__right (not the partner tiers progress in the middle)
+    const toolbarRight = document.querySelector('.toolbar__right');
+    if (!toolbarRight) return null;
+
+    const likeIcon = toolbarRight.querySelector('.ynicon-like');
     if (!likeIcon) return null;
 
     const valueDiv = likeIcon.parentElement?.querySelector('.toolbar__value');
