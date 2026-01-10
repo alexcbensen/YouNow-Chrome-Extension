@@ -36,7 +36,7 @@ function getCurrentLikesFromToolbar() {
     // Find the likes in toolbar__right (not the partner tiers progress in the middle)
     const toolbarRight = document.querySelector('.toolbar__right');
     if (!toolbarRight) return null;
-
+    
     const likeIcon = toolbarRight.querySelector('.ynicon-like');
     if (!likeIcon) return null;
 
@@ -64,7 +64,7 @@ function createChestControls() {
     // Get the BetterNow toolbar's left section
     const betterNowToolbar = document.getElementById('betternow-toolbar');
     if (!betterNowToolbar) return;
-
+    
     const leftSection = betterNowToolbar.querySelector('.betternow-toolbar__left');
     if (!leftSection) return;
 
@@ -170,7 +170,7 @@ function createChestControls() {
     const thresholdInput = document.getElementById('chest-threshold-input');
     const updateBtn = document.getElementById('chest-threshold-update');
     const updateStatus = document.getElementById('chest-update-status');
-
+    
     // Store the last saved value to detect changes
     let lastSavedValue = autoChestThreshold ? autoChestThreshold.toLocaleString() : '';
 
@@ -184,7 +184,7 @@ function createChestControls() {
     // Format input with commas as user types, support K/M suffixes
     thresholdInput.addEventListener('input', () => {
         let raw = thresholdInput.value.trim();
-
+        
         // Check for K or M suffix
         const upperRaw = raw.toUpperCase();
         let multiplier = 1;
@@ -195,14 +195,14 @@ function createChestControls() {
             multiplier = 1000000;
             raw = raw.slice(0, -1);
         }
-
+        
         // Strip non-digits and parse
         const digits = raw.replace(/[^\d]/g, '');
         if (digits) {
             const num = parseInt(digits) * multiplier;
             thresholdInput.value = num.toLocaleString();
         }
-
+        
         // Auto-resize input based on content
         const tempSpan = document.createElement('span');
         tempSpan.style.cssText = 'font-size: .8rem; font-weight: 600; font-family: inherit; visibility: hidden; position: absolute;';
@@ -211,7 +211,7 @@ function createChestControls() {
         const newWidth = Math.max(70, tempSpan.offsetWidth + 30);
         thresholdInput.style.width = newWidth + 'px';
         tempSpan.remove();
-
+        
         // Show/hide Set button based on whether value has changed
         if (thresholdInput.value !== lastSavedValue && thresholdInput.value !== '') {
             updateBtn.style.display = 'inline-block';
@@ -219,7 +219,7 @@ function createChestControls() {
             updateBtn.style.display = 'none';
         }
     });
-
+    
     // Trigger resize on initial load if there's a value
     if (thresholdInput.value) {
         // Just resize, don't show button
@@ -241,7 +241,7 @@ function createChestControls() {
 
             // Reformat with commas
             thresholdInput.value = value.toLocaleString();
-
+            
             // Update last saved value and hide Set button
             lastSavedValue = thresholdInput.value;
             updateBtn.style.display = 'none';
@@ -461,7 +461,7 @@ function isLightMode() {
 // Inject CSS to fix light mode text colors
 function injectLightModeStyles() {
     if (document.getElementById('betternow-lightmode-styles')) return;
-
+    
     const style = document.createElement('style');
     style.id = 'betternow-lightmode-styles';
     style.textContent = `
@@ -478,23 +478,23 @@ injectLightModeStyles();
 // Apply gradient border to a card element
 function applyGradientBorder(card, color1, color2) {
     if (!color1) return;
-
+    
     // Skip if already processed
     if (card.querySelector('.betternow-inner')) return;
-
+    
     // If same color or no second color, use simple border
     if (!color2 || color1.toLowerCase() === color2.toLowerCase()) {
         card.style.border = `1px solid ${color1}`;
         card.style.borderRadius = '8px';
         return;
     }
-
+    
     // For gradient border: set gradient as background, create inner container for content
     card.style.border = 'none';
     card.style.borderRadius = '8px';
     card.style.padding = '1px';
     card.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
-
+    
     // Create inner container that will hold the content with the background color
     const inner = document.createElement('div');
     inner.className = 'betternow-inner';
@@ -507,7 +507,7 @@ function applyGradientBorder(card, color1, color2) {
         padding: 0.5rem;
         gap: 0.5rem;
     `;
-
+    
     // Move all children into inner
     while (card.firstChild) {
         inner.appendChild(card.firstChild);
@@ -516,7 +516,7 @@ function applyGradientBorder(card, color1, color2) {
 }
 
 function applyBorders() {
-
+    
     // Apply borders for my username
     document.querySelectorAll(`span[title="${myUsername}"]`).forEach(span => {
         const li = span.closest('li');
@@ -678,7 +678,7 @@ function createGridToggle() {
 
 function applyGridView() {
     const videoCount = getVideoCount();
-
+    
     // Only apply grid view if enabled AND 2+ videos
     if (gridViewEnabled && videoCount >= 2) {
         document.body.classList.add('grid-view-enabled');
@@ -699,7 +699,7 @@ function fixVideoFit() {
 
     allVideos.forEach(video => {
         const videoTile = video.closest('.video');
-
+        
         if (video.classList.contains('is-screenshare')) {
             // Screenshare: show full content
             video.style.objectFit = 'contain';
@@ -707,7 +707,7 @@ function fixVideoFit() {
             // Regular video: fill the frame (may crop edges)
             video.style.objectFit = 'cover';
         }
-
+        
         // Clear any custom aspect ratio
         if (videoTile) {
             videoTile.style.aspectRatio = '';
@@ -736,7 +736,7 @@ function hideNotifications() {
                 if (usernameEl && usernameEl.textContent.trim().toLowerCase() === username.toLowerCase()) {
                     notification.style.display = 'none';
                 }
-
+                
                 // Also hide notifications that mention the hidden user in the text
                 const textEl = notification.querySelector('.user-card__right');
                 if (textEl && textEl.textContent.toLowerCase().includes(username.toLowerCase())) {
@@ -788,7 +788,7 @@ function hideBroadcasters() {
             }
         });
     });
-
+    
     // Also hide notifications
     hideNotifications();
 }
@@ -864,21 +864,6 @@ function hideCarouselBroadcasters() {
     });
 }
 
-// ============ Individual Volume Sliders ============
-
-// Store volume states per video (keyed by username in toolbar)
-// Load from localStorage or initialize empty
-const guestVolumeStates = new Map(JSON.parse(localStorage.getItem('betternow-guest-volumes') || '[]'));
-
-function saveGuestVolumes() {
-    localStorage.setItem('betternow-guest-volumes', JSON.stringify([...guestVolumeStates]));
-}
-
-function getGuestUsername(tile) {
-    const usernameEl = tile.querySelector('.username span');
-    return usernameEl ? usernameEl.textContent.trim() : null;
-}
-
 // ============ BetterNow Toolbar ============
 
 // headerCssEnabled = true means NON-sticky (BetterNow style), false means sticky (YouNow default)
@@ -887,11 +872,11 @@ let headerCssEnabled = localStorage.getItem('betternow-sticky-header-disabled') 
 function createBetterNowToolbar() {
     // Check if toolbar already exists
     if (document.getElementById('betternow-toolbar')) return document.getElementById('betternow-toolbar');
-
+    
     // Find the YouNow top toolbar to insert above
     const youNowToolbar = document.querySelector('app-top-toolbar');
     if (!youNowToolbar) return null;
-
+    
     // Create our toolbar
     const toolbar = document.createElement('div');
     toolbar.id = 'betternow-toolbar';
@@ -902,20 +887,20 @@ function createBetterNowToolbar() {
         padding: 8px 12px;
         border-bottom: 1px solid var(--main-border-color, #4e4e4e);
     `;
-
+    
     // Create left, middle, and right sections
     const leftSection = document.createElement('div');
     leftSection.className = 'betternow-toolbar__left';
     leftSection.style.cssText = 'display: flex; align-items: center; gap: 12px; flex: 1;';
-
+    
     const middleSection = document.createElement('div');
     middleSection.className = 'betternow-toolbar__middle';
     middleSection.style.cssText = 'display: flex; align-items: center; justify-content: center;';
-
+    
     const rightSection = document.createElement('div');
     rightSection.className = 'betternow-toolbar__right';
     rightSection.style.cssText = 'display: flex; align-items: center; gap: 12px; flex: 1; justify-content: flex-end;';
-
+    
     // Add CSS toggle button to left section for testing
     const cssToggle = document.createElement('button');
     cssToggle.id = 'betternow-css-toggle';
@@ -933,7 +918,7 @@ function createBetterNowToolbar() {
         cursor: pointer;
         font-family: inherit;
     `;
-
+    
     // Apply initial header state
     const header = document.querySelector('app-channel .header');
     if (header) {
@@ -947,7 +932,7 @@ function createBetterNowToolbar() {
         header.style.setProperty('border-bottom', 'none', 'important');
         header.style.setProperty('border-color', 'transparent', 'important');
     }
-
+    
     cssToggle.onclick = () => {
         headerCssEnabled = !headerCssEnabled;
         localStorage.setItem('betternow-sticky-header-disabled', headerCssEnabled.toString());
@@ -971,7 +956,7 @@ function createBetterNowToolbar() {
         }
     };
     leftSection.appendChild(cssToggle);
-
+    
     // Add Grid View toggle button
     const gridToggle = document.createElement('button');
     gridToggle.id = 'grid-toggle-btn';
@@ -996,602 +981,42 @@ function createBetterNowToolbar() {
         applyGridView();
     };
     leftSection.appendChild(gridToggle);
-
+    
     // Apply initial grid view state
     applyGridView();
-
+    
     toolbar.appendChild(leftSection);
     toolbar.appendChild(middleSection);
     toolbar.appendChild(rightSection);
-
+    
     // Insert above YouNow toolbar
     youNowToolbar.parentNode.insertBefore(toolbar, youNowToolbar);
-
+    
     // Try to create admin bar (async, for admin users only)
     if (typeof createAdminBar === 'function') {
         createAdminBar();
     }
-
+    
     return toolbar;
 }
-
-// Create global volume slider for all guests
-function createGlobalVolumeSlider() {
-    // Ensure BetterNow toolbar exists
-    const betterNowToolbar = createBetterNowToolbar();
-    if (!betterNowToolbar) return;
-
-    const rightSection = betterNowToolbar.querySelector('.betternow-toolbar__right');
-    if (!rightSection) return;
-
-    const videoTiles = document.querySelectorAll('.fullscreen-wrapper > .video');
-    const hasGuests = videoTiles.length > 0;
-
-    // Find main broadcaster video
-    const broadcasterVideo = document.querySelector('.video-player video');
-
-    // Remove slider if no broadcaster video
-    if (!broadcasterVideo) {
-        const existingSlider = document.querySelector('.betternow-global-volume');
-        if (existingSlider) existingSlider.remove();
-        const existingLabel = document.querySelector('.betternow-volume-label');
-        if (existingLabel) existingLabel.remove();
-        return;
-    }
-
-    // Check if already exists
-    let volumeContainer = rightSection.querySelector('.betternow-global-volume');
-    const alreadyExists = !!volumeContainer;
-
-    if (!alreadyExists) {
-        // Create new slider
-        volumeContainer = document.createElement('div');
-        volumeContainer.className = 'betternow-global-volume';
-        volumeContainer.style.cssText = 'position: relative; display: flex; align-items: center;';
-
-        // Create label (plain text, positioned above on hover)
-        const label = document.createElement('span');
-        label.className = 'betternow-volume-label';
-        label.textContent = 'Stream Volume';
-        label.style.cssText = 'position: fixed; font-size: 0.75rem; font-weight: 500; color: var(--color-text, #fff); white-space: nowrap; pointer-events: none; z-index: 9999; display: none;';
-
-        const volumeContent = document.createElement('div');
-        volumeContent.className = 'volume toolbar__content';
-        volumeContent.style.cssText = 'display: flex; align-items: center; gap: 8px;';
-
-        const sliderContainer = document.createElement('div');
-        sliderContainer.className = 'volume__range';
-
-        const slider = document.createElement('input');
-        slider.type = 'range';
-        slider.min = '0';
-        slider.max = '100';
-        slider.className = 'slider';
-        slider.style.width = '60px';
-
-        const volumeBtn = document.createElement('button');
-        volumeBtn.className = 'volume__icon only-icon';
-        volumeBtn.style.cssText = 'background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;';
-
-        const volumeIcon = document.createElement('i');
-        volumeBtn.appendChild(volumeIcon);
-
-        sliderContainer.appendChild(slider);
-        volumeContent.appendChild(sliderContainer);
-        volumeContent.appendChild(volumeBtn);
-        document.body.appendChild(label);
-        volumeContainer.appendChild(volumeContent);
-
-        rightSection.appendChild(volumeContainer);
-
-        // Show label only on hover, positioned above the slider
-        volumeContent.addEventListener('mouseenter', () => {
-            const sliderRect = sliderContainer.getBoundingClientRect();
-            label.style.left = (sliderRect.left + sliderRect.width / 2) + 'px';
-            label.style.top = (sliderRect.top - 20) + 'px';
-            label.style.transform = 'translateX(-50%)';
-            label.style.display = '';
-        });
-
-        volumeContent.addEventListener('mouseleave', () => {
-            label.style.display = 'none';
-        });
-    }
-
-    const slider = volumeContainer.querySelector('.slider');
-    const volumeIcon = volumeContainer.querySelector('.volume__icon i');
-    const volumeBtn = volumeContainer.querySelector('.volume__icon');
-
-    // Update mode based on whether there are guests
-    const currentMode = volumeContainer.dataset.mode;
-    const newMode = hasGuests ? 'multiplier' : 'broadcaster';
-
-    if (currentMode !== newMode) {
-        volumeContainer.dataset.mode = newMode;
-
-        // Remove old event listeners by cloning
-        const newSlider = slider.cloneNode(true);
-        slider.parentNode.replaceChild(newSlider, slider);
-        const newVolumeBtn = volumeBtn.cloneNode(true);
-        volumeBtn.parentNode.replaceChild(newVolumeBtn, volumeBtn);
-
-        const freshSlider = volumeContainer.querySelector('.slider');
-        const freshVolumeBtn = volumeContainer.querySelector('.volume__icon');
-        const freshVolumeIcon = freshVolumeBtn.querySelector('i');
-
-        if (newMode === 'broadcaster') {
-            // Mirror broadcaster mode
-            freshVolumeBtn.title = 'Broadcaster Volume';
-
-            // Set initial value from broadcaster
-            const currentVol = Math.round(broadcasterVideo.volume * 100);
-            freshSlider.value = currentVol.toString();
-            updateVolumeIcon(freshVolumeIcon, currentVol.toString());
-
-            freshSlider.addEventListener('input', () => {
-                const vol = parseInt(freshSlider.value);
-                broadcasterVideo.volume = vol / 100;
-                broadcasterVideo.muted = vol === 0;
-                updateVolumeIcon(freshVolumeIcon, freshSlider.value);
-            });
-
-            freshVolumeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (broadcasterVideo.muted || broadcasterVideo.volume === 0) {
-                    broadcasterVideo.muted = false;
-                    broadcasterVideo.volume = 0.5;
-                    freshSlider.value = '50';
-                } else {
-                    broadcasterVideo.muted = true;
-                    freshSlider.value = '0';
-                }
-                updateVolumeIcon(freshVolumeIcon, freshSlider.value);
-            });
-        } else {
-            // Multiplier mode for guests
-            freshVolumeBtn.title = 'Global Guest Volume';
-
-            let globalMultiplier = parseInt(localStorage.getItem('betternow-global-guest-multiplier') || '100');
-            let lastNonZeroMultiplier = parseInt(localStorage.getItem('betternow-global-guest-last-multiplier') || '100');
-
-            freshSlider.value = globalMultiplier.toString();
-            updateVolumeIcon(freshVolumeIcon, globalMultiplier.toString());
-
-            freshSlider.addEventListener('input', () => {
-                globalMultiplier = parseInt(freshSlider.value);
-                if (globalMultiplier > 0) {
-                    lastNonZeroMultiplier = globalMultiplier;
-                    localStorage.setItem('betternow-global-guest-last-multiplier', lastNonZeroMultiplier.toString());
-                }
-                localStorage.setItem('betternow-global-guest-multiplier', globalMultiplier.toString());
-                updateVolumeIcon(freshVolumeIcon, freshSlider.value);
-                applyGlobalMultiplier(globalMultiplier);
-            });
-
-            freshVolumeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (globalMultiplier === 0) {
-                    globalMultiplier = lastNonZeroMultiplier;
-                    freshSlider.value = globalMultiplier.toString();
-                } else {
-                    lastNonZeroMultiplier = globalMultiplier;
-                    localStorage.setItem('betternow-global-guest-last-multiplier', lastNonZeroMultiplier.toString());
-                    globalMultiplier = 0;
-                    freshSlider.value = '0';
-                }
-                localStorage.setItem('betternow-global-guest-multiplier', globalMultiplier.toString());
-                updateVolumeIcon(freshVolumeIcon, freshSlider.value);
-                applyGlobalMultiplier(globalMultiplier);
-            });
-
-            // Apply initial multiplier
-            applyGlobalMultiplier(globalMultiplier);
-        }
-    }
-
-    // In broadcaster mode, sync with broadcaster video periodically
-    if (volumeContainer.dataset.mode === 'broadcaster') {
-        const currentVol = broadcasterVideo.muted ? 0 : Math.round(broadcasterVideo.volume * 100);
-        const sliderVol = parseInt(volumeContainer.querySelector('.slider').value);
-        if (currentVol !== sliderVol) {
-            volumeContainer.querySelector('.slider').value = currentVol.toString();
-            updateVolumeIcon(volumeContainer.querySelector('.volume__icon i'), currentVol.toString());
-        }
-    }
-}
-
-function applyGlobalMultiplier(multiplier) {
-    const videoTiles = document.querySelectorAll('.fullscreen-wrapper > .video');
-
-    videoTiles.forEach(tile => {
-        const videoElements = tile.querySelectorAll('video');
-        const username = getGuestUsername(tile);
-
-        if (videoElements.length === 0 || !username) return;
-
-        // Get the individual saved volume (base volume)
-        const baseVolume = guestVolumeStates.has(username) ? guestVolumeStates.get(username) : 100;
-
-        // Apply multiplier to base volume
-        const effectiveVolume = (baseVolume * multiplier) / 100;
-
-        // Apply to ALL videos in this tile
-        videoElements.forEach(v => {
-            v.volume = effectiveVolume / 100;
-            v.muted = effectiveVolume === 0;
-        });
-    });
-}
-
-// Apply saved volumes to videos as early as possible
-function applyEarlyVolumes() {
-    const globalMultiplier = parseInt(localStorage.getItem('betternow-global-guest-multiplier') || '100');
-    const videoTiles = document.querySelectorAll('.fullscreen-wrapper > .video');
-
-    videoTiles.forEach(tile => {
-        const username = getGuestUsername(tile);
-        // Get ALL video elements in this tile
-        const videoElements = tile.querySelectorAll('video');
-
-        if (videoElements.length === 0) return;
-
-        // Get base volume (individual setting or default 100)
-        const baseVolume = (username && guestVolumeStates.has(username))
-            ? guestVolumeStates.get(username)
-            : 100;
-
-        // Apply multiplier
-        const effectiveVolume = (baseVolume * globalMultiplier) / 100;
-
-        // Apply to each video that hasn't been processed yet
-        videoElements.forEach(v => {
-            // Skip if this specific video already has volume applied
-            if (v.dataset.volumeApplied) return;
-
-            // Skip the user's own tile (shows "You") to prevent echo
-            if (username === 'You') {
-                v.muted = true;
-                v.dataset.volumeApplied = 'true';
-                return;
-            }
-
-            v.volume = effectiveVolume / 100;
-            v.muted = effectiveVolume === 0;
-            v.dataset.volumeApplied = 'true';
-        });
-    });
-}
-
-// Watch for video elements being added and apply volumes immediately
-const earlyVolumeObserver = new MutationObserver(() => {
-    applyEarlyVolumes();
-});
-
-// Start observing as soon as possible
-if (document.body) {
-    earlyVolumeObserver.observe(document.body, { childList: true, subtree: true });
-} else {
-    document.addEventListener('DOMContentLoaded', () => {
-        earlyVolumeObserver.observe(document.body, { childList: true, subtree: true });
-    });
-}
-
-// Also run immediately and frequently at startup
-applyEarlyVolumes();
-setTimeout(applyEarlyVolumes, 100);
-setTimeout(applyEarlyVolumes, 250);
-setTimeout(applyEarlyVolumes, 500);
-
-function createVolumeSliders() {
-    // Find all video tiles (not the main broadcaster)
-    const videoTiles = document.querySelectorAll('.fullscreen-wrapper > .video');
-
-    videoTiles.forEach(tile => {
-        // Skip if already has volume slider
-        if (tile.querySelector('.betternow-volume-slider')) return;
-
-        // Find ALL video elements in this tile (there can be multiple with screenshare)
-        const videoElements = tile.querySelectorAll('video');
-        if (videoElements.length === 0) return;
-
-        // Get username for this tile to track volume state
-        const username = getGuestUsername(tile);
-
-        // Skip the user's own tile (shows "You") to prevent echo
-        if (username === 'You') {
-            // Keep own audio muted on all videos
-            videoElements.forEach(v => v.muted = true);
-            return;
-        }
-
-        // Find the toolbar overlay bottom (where the volume icon should go)
-        const toolbarBottom = tile.querySelector('.video-overlay-bottom .toolbar__right');
-        if (!toolbarBottom) return;
-
-        // Get global multiplier
-        const globalMultiplier = parseInt(localStorage.getItem('betternow-global-guest-multiplier') || '100');
-
-        // Restore saved base volume or default to 100
-        let baseVolume = 100;
-        if (username && guestVolumeStates.has(username)) {
-            baseVolume = guestVolumeStates.get(username);
-        }
-
-        // Apply multiplier for actual video volume to ALL videos in this tile
-        const effectiveVolume = (baseVolume * globalMultiplier) / 100;
-        videoElements.forEach(videoEl => {
-            videoEl.volume = effectiveVolume / 100;
-            videoEl.muted = effectiveVolume === 0;
-        });
-
-        // Create volume container matching YouNow's structure
-        const volumeContainer = document.createElement('div');
-        volumeContainer.className = 'betternow-volume-slider toolbar__entry';
-        volumeContainer.style.display = 'none'; // Hidden by default
-
-        const volumeContent = document.createElement('div');
-        volumeContent.className = 'volume toolbar__content';
-        volumeContent.style.cssText = 'display: flex; align-items: center;';
-
-        // Create slider container (hidden by default, show on hover over icon)
-        const sliderContainer = document.createElement('div');
-        sliderContainer.className = 'volume__range';
-        sliderContainer.style.cssText = 'display: none; margin-right: 8px;';
-
-        // Create slider matching YouNow's
-        const slider = document.createElement('input');
-        slider.type = 'range';
-        slider.min = '0';
-        slider.max = '100';
-        slider.value = baseVolume.toString();
-        slider.className = 'slider';
-
-        // Create volume button
-        const volumeBtn = document.createElement('button');
-        volumeBtn.className = 'volume__icon only-icon';
-        volumeBtn.style.cssText = 'background: none; border: none; cursor: pointer; padding: 0;';
-
-        // Create volume icon
-        const volumeIcon = document.createElement('i');
-        volumeIcon.className = 'ynicon ynicon-mute';
-
-        // Update video volume when slider changes - apply to ALL videos in tile
-        slider.addEventListener('input', () => {
-            const baseVolume = parseInt(slider.value);
-            const globalMultiplier = parseInt(localStorage.getItem('betternow-global-guest-multiplier') || '100');
-            const effectiveVolume = (baseVolume * globalMultiplier) / 100;
-
-            // Apply to all videos in this tile
-            tile.querySelectorAll('video').forEach(v => {
-                v.volume = effectiveVolume / 100;
-                v.muted = effectiveVolume === 0;
-            });
-            updateVolumeIcon(volumeIcon, slider.value);
-
-            // Save base volume state
-            const currentUsername = getGuestUsername(tile);
-            if (currentUsername) {
-                guestVolumeStates.set(currentUsername, baseVolume);
-                saveGuestVolumes();
-            }
-        });
-
-        // Toggle mute on icon click - apply to ALL videos in tile
-        volumeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const globalMultiplier = parseInt(localStorage.getItem('betternow-global-guest-multiplier') || '100');
-            const videos = tile.querySelectorAll('video');
-            const firstVideo = videos[0];
-
-            if (firstVideo && (firstVideo.muted || firstVideo.volume === 0)) {
-                const baseVolume = 50;
-                const effectiveVolume = (baseVolume * globalMultiplier) / 100;
-                videos.forEach(v => {
-                    v.muted = false;
-                    v.volume = effectiveVolume / 100;
-                });
-                slider.value = '50';
-            } else {
-                videos.forEach(v => {
-                    v.muted = true;
-                    v.volume = 0;
-                });
-                slider.value = '0';
-            }
-            updateVolumeIcon(volumeIcon, slider.value);
-
-            // Save base volume state
-            const currentUsername = getGuestUsername(tile);
-            if (currentUsername) {
-                guestVolumeStates.set(currentUsername, parseInt(slider.value));
-                saveGuestVolumes();
-            }
-        });
-
-        // Show slider on hover over the volume control
-        volumeContent.addEventListener('mouseenter', () => {
-            sliderContainer.style.display = 'block';
-        });
-
-        volumeContent.addEventListener('mouseleave', () => {
-            sliderContainer.style.display = 'none';
-        });
-
-        // Prevent clicks from propagating to video tile
-        volumeContainer.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-
-        sliderContainer.appendChild(slider);
-        volumeBtn.appendChild(volumeIcon);
-        volumeContent.appendChild(sliderContainer);
-        volumeContent.appendChild(volumeBtn);
-        volumeContainer.appendChild(volumeContent);
-        toolbarBottom.appendChild(volumeContainer);
-
-        // Set initial icon state (use first video as reference)
-        const firstVideo = videoElements[0];
-        updateVolumeIcon(volumeIcon, firstVideo.muted ? '0' : (firstVideo.volume * 100).toString());
-    });
-}
-
-// Update volume slider visibility based on tile selection
-function updateVolumeSliderVisibility() {
-    const videoTiles = document.querySelectorAll('.fullscreen-wrapper > .video');
-
-    videoTiles.forEach(tile => {
-        const volumeSlider = tile.querySelector('.betternow-volume-slider');
-        if (!volumeSlider) return;
-
-        const toolbarContainer = tile.querySelector('.toolbar--overlay-container');
-        if (toolbarContainer && toolbarContainer.classList.contains('is-main')) {
-            volumeSlider.style.display = '';
-        } else {
-            volumeSlider.style.display = 'none';
-        }
-    });
-}
-
-function updateVolumeIcon(icon, value) {
-    const vol = parseInt(value);
-    if (vol === 0) {
-        icon.className = 'ynicon ynicon-mute-sel';
-    } else {
-        icon.className = 'ynicon ynicon-mute';
-    }
-}
-
-// Watch for selection changes and reapply volumes immediately
-function setupVolumeObserver() {
-    const fullscreenWrapper = document.querySelector('.fullscreen-wrapper');
-    if (!fullscreenWrapper || fullscreenWrapper.dataset.volumeObserver) return;
-
-    fullscreenWrapper.dataset.volumeObserver = 'true';
-
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach(mutation => {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                const target = mutation.target;
-                if (target.classList.contains('toolbar--overlay-container')) {
-                    // Selection changed - reapply volumes to ALL tiles and update visibility
-                    reapplyAllGuestVolumes();
-                    updateVolumeSliderVisibility();
-                }
-            }
-        });
-    });
-
-    observer.observe(fullscreenWrapper, {
-        attributes: true,
-        attributeFilter: ['class'],
-        subtree: true
-    });
-}
-
-function reapplyAllGuestVolumes() {
-    const globalMultiplier = parseInt(localStorage.getItem('betternow-global-guest-multiplier') || '100');
-    const videoTiles = document.querySelectorAll('.fullscreen-wrapper > .video');
-
-    videoTiles.forEach(tile => {
-        const username = getGuestUsername(tile);
-        const videoElements = tile.querySelectorAll('video');
-        const slider = tile.querySelector('.betternow-volume-slider .slider');
-        const volumeIcon = tile.querySelector('.betternow-volume-slider .volume__icon i');
-
-        if (videoElements.length === 0) return;
-
-        // Skip the user's own tile (shows "You") to prevent echo
-        if (username === 'You') {
-            videoElements.forEach(v => v.muted = true);
-            return;
-        }
-
-        // Get base volume
-        const baseVolume = (username && guestVolumeStates.has(username))
-            ? guestVolumeStates.get(username)
-            : 100;
-
-        // Apply multiplier for actual video volume to ALL videos in tile
-        const effectiveVolume = (baseVolume * globalMultiplier) / 100;
-
-        videoElements.forEach(v => {
-            v.volume = effectiveVolume / 100;
-            v.muted = effectiveVolume === 0;
-        });
-
-        // Individual slider shows base volume (not multiplied)
-        if (slider) slider.value = baseVolume.toString();
-        if (volumeIcon) updateVolumeIcon(volumeIcon, baseVolume.toString());
-    });
-}
-
-// Initialize volume controls when DOM changes (instead of polling every second)
-function initVolumeControls() {
-    setupVolumeObserver();
-    createVolumeSliders();
-    updateVolumeSliderVisibility();
-    createGlobalVolumeSlider();
-}
-
-// Observer to detect when video player or toolbar appears
-const volumeControlsObserver = new MutationObserver((mutations) => {
-    let shouldInit = false;
-
-    for (const mutation of mutations) {
-        // Check for added nodes that might be video tiles or toolbar
-        if (mutation.addedNodes.length > 0) {
-            for (const node of mutation.addedNodes) {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    // Check if it's a video tile, toolbar, or contains them
-                    if (node.matches?.('.video, .fullscreen-wrapper, .toolbar, app-channel') ||
-                        node.querySelector?.('.video, .fullscreen-wrapper, .toolbar')) {
-                        shouldInit = true;
-                        break;
-                    }
-                }
-            }
-        }
-        if (shouldInit) break;
-    }
-
-    if (shouldInit) {
-        // Debounce to avoid multiple rapid calls
-        clearTimeout(volumeControlsObserver.timeout);
-        volumeControlsObserver.timeout = setTimeout(initVolumeControls, 100);
-    }
-});
-
-// Start observing
-if (document.body) {
-    volumeControlsObserver.observe(document.body, { childList: true, subtree: true });
-} else {
-    document.addEventListener('DOMContentLoaded', () => {
-        volumeControlsObserver.observe(document.body, { childList: true, subtree: true });
-    });
-}
-
-// Also run on initial load and navigation
-initVolumeControls();
-document.addEventListener('DOMContentLoaded', initVolumeControls);
-window.addEventListener('popstate', initVolumeControls); // Handle back/forward navigation
 
 // ============ Profile Modal Developer Badge ============
 
 function addDevBadgeToProfileModal() {
     // Find profile modals
     const modals = document.querySelectorAll('app-sidebar-modal-mini-profile');
-
+    
     modals.forEach(modal => {
         // Check if we already added the text badge
         if (modal.querySelector('.betternow-dev-profile-badge')) return;
-
+        
         // Check if this is Alex's profile - the name is in h3 > p
         const nameEl = modal.querySelector('h3 > p');
         if (!nameEl) return;
-
+        
         const profileName = nameEl.textContent.trim();
         if (profileName !== myUsername) return;
-
+        
         // Add badge to the badge list (same as chat)
         const badgeList = modal.querySelector('user-badges .user-badge ul.badge-list');
         if (badgeList && !badgeList.querySelector('.betternow-dev-badge')) {
@@ -1606,7 +1031,7 @@ function addDevBadgeToProfileModal() {
             devBadgeLi.appendChild(devBadge);
             badgeList.appendChild(devBadgeLi);
         }
-
+        
         // Add "BetterNow Developer" text below name/level
         const titleLink = modal.querySelector('a.title');
         if (titleLink) {
