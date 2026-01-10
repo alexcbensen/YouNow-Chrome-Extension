@@ -9,7 +9,7 @@ function isLightMode() {
 // Inject CSS to fix light mode text colors
 function injectLightModeStyles() {
     if (document.getElementById('betternow-lightmode-styles')) return;
-    
+
     const style = document.createElement('style');
     style.id = 'betternow-lightmode-styles';
     style.textContent = `
@@ -26,23 +26,23 @@ injectLightModeStyles();
 // Apply gradient border to a card element
 function applyGradientBorder(card, color1, color2) {
     if (!color1) return;
-    
+
     // Skip if already processed
     if (card.querySelector('.betternow-inner')) return;
-    
+
     // If same color or no second color, use simple border
     if (!color2 || color1.toLowerCase() === color2.toLowerCase()) {
         card.style.border = `1px solid ${color1}`;
         card.style.borderRadius = '8px';
         return;
     }
-    
+
     // For gradient border: set gradient as background, create inner container for content
     card.style.border = 'none';
     card.style.borderRadius = '8px';
     card.style.padding = '1px';
     card.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
-    
+
     // Create inner container that will hold the content with the background color
     const inner = document.createElement('div');
     inner.className = 'betternow-inner';
@@ -55,7 +55,7 @@ function applyGradientBorder(card, color1, color2) {
         padding: 0.5rem;
         gap: 0.5rem;
     `;
-    
+
     // Move all children into inner
     while (card.firstChild) {
         inner.appendChild(card.firstChild);
@@ -64,7 +64,7 @@ function applyGradientBorder(card, color1, color2) {
 }
 
 function applyBorders() {
-    
+
     // Apply borders for my username
     document.querySelectorAll(`span[title="${myUsername}"]`).forEach(span => {
         const li = span.closest('li');
@@ -111,8 +111,8 @@ function applyBorders() {
                         top: 50%;
                         left: 50%;
                         transform: translate(-50%, -50%);
-                        width: calc(100% + 6px);
-                        height: calc(100% + 6px);
+                        width: 134%;
+                        height: auto;
                         pointer-events: none;
                         z-index: 1;
                     `;
