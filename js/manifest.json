@@ -19,6 +19,7 @@
         "js/templates.js",
         "js/firebase.js",
         "js/admin.js",
+        "js/features/grid/grid.js",
         "js/features.js",
         "js/features/chat/chat.js",
         "js/features/chest/chest.js",
