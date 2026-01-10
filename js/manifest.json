@@ -21,6 +21,7 @@
         "js/admin.js",
         "js/features/grid/grid.js",
         "js/features.js",
+        "js/features/badges/badges.js",
         "js/features/chat/chat.js",
         "js/features/chest/chest.js",
         "js/features/explore/explore.js",
