@@ -657,11 +657,9 @@ function initVolumeControls() {
     
     // Once we have the global slider created, we're fully initialized
     // The guestChangeObserver will handle future guest join/leave
-    if (document.querySelector('.betternow-global-volume')) {
-        if (!volumeInitialized) {
-            volumeLog('Volume controls fully initialized, stopping main observer');
-            volumeControlsObserver.disconnect();
-        }
+    if (document.querySelector('.betternow-global-volume') && !volumeInitialized) {
+        volumeLog('Volume controls fully initialized, stopping main observer');
+        volumeControlsObserver.disconnect();
         volumeInitialized = true;
     }
 }
