@@ -654,13 +654,25 @@ function initVolumeControls() {
     createVolumeSliders();
     updateVolumeSliderVisibility();
     createGlobalVolumeSlider();
-    volumeInitialized = true;
+    
+    // Once we have the global slider created, we're fully initialized
+    // The guestChangeObserver will handle future guest join/leave
+    if (document.querySelector('.betternow-global-volume')) {
+        if (!volumeInitialized) {
+            volumeLog('Volume controls fully initialized, stopping main observer');
+            volumeControlsObserver.disconnect();
+        }
+        volumeInitialized = true;
+    }
 }
 
-// Observer to detect when video player appears
+// Observer to detect when video player appears (only needed for initial load)
 let pendingInitTimeout = null;
 
 const volumeControlsObserver = new MutationObserver((mutations) => {
+    // Skip if already fully initialized
+    if (volumeInitialized) return;
+    
     let shouldInit = false;
     
     for (const mutation of mutations) {
@@ -714,6 +726,9 @@ if (document.readyState === 'loading') {
 
 // Handle SPA navigation (back/forward buttons)
 window.addEventListener('popstate', () => {
-    volumeLog('popstate: Navigation detected');
+    volumeLog('popstate: Navigation detected, resetting');
+    volumeInitialized = false;
+    // Restart observer since we disconnected it after init
+    volumeControlsObserver.observe(document.body, { childList: true, subtree: true });
     initVolumeControls();
 });
