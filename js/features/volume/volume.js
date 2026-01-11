@@ -318,7 +318,26 @@ function applyEarlyVolumes() {
 
 // Watch for guest join/leave - observe fullscreen-wrapper for video tile changes
 let guestChangeObserver = null;
-let lastVideoTileCount = 0;
+let lastGuestUsernames = new Set();
+
+function getCurrentGuestUsernames() {
+    const usernames = new Set();
+    document.querySelectorAll('.fullscreen-wrapper > .video').forEach(tile => {
+        const username = getGuestUsername(tile);
+        if (username && username !== 'You') {
+            usernames.add(username);
+        }
+    });
+    return usernames;
+}
+
+function setsAreEqual(a, b) {
+    if (a.size !== b.size) return false;
+    for (const item of a) {
+        if (!b.has(item)) return false;
+    }
+    return true;
+}
 
 function setupGuestChangeObserver() {
     const fullscreenWrapper = document.querySelector('.fullscreen-wrapper');
@@ -335,7 +354,6 @@ function setupGuestChangeObserver() {
                 // Check added nodes for video tiles
                 for (const node of mutation.addedNodes) {
                     if (node.nodeType === Node.ELEMENT_NODE && node.classList?.contains('video')) {
-                        volumeLog('guestChangeObserver: Video tile added');
                         videoTileChanged = true;
                         break;
                     }
@@ -343,7 +361,6 @@ function setupGuestChangeObserver() {
                 // Check removed nodes for video tiles
                 for (const node of mutation.removedNodes) {
                     if (node.nodeType === Node.ELEMENT_NODE && node.classList?.contains('video')) {
-                        volumeLog('guestChangeObserver: Video tile removed');
                         videoTileChanged = true;
                         break;
                     }
@@ -353,23 +370,29 @@ function setupGuestChangeObserver() {
         }
         
         if (videoTileChanged) {
-            const currentCount = document.querySelectorAll('.fullscreen-wrapper > .video').length;
-            volumeLog('guestChangeObserver: Video tile count changed:', lastVideoTileCount, '→', currentCount);
-            lastVideoTileCount = currentCount;
+            // Check if the actual guest list changed (not just DOM reshuffling)
+            const currentUsernames = getCurrentGuestUsernames();
             
-            // Reapply volumes after a short delay to let DOM settle
-            setTimeout(() => {
-                volumeLog('guestChangeObserver: Reapplying volumes after guest change');
-                reapplyAllGuestVolumes();
-                createVolumeSliders();
-                updateVolumeSliderVisibility();
-            }, 100);
+            if (!setsAreEqual(currentUsernames, lastGuestUsernames)) {
+                volumeLog('guestChangeObserver: Guest list changed:', 
+                    [...lastGuestUsernames].join(', ') || '(none)', '→', 
+                    [...currentUsernames].join(', ') || '(none)');
+                lastGuestUsernames = currentUsernames;
+                
+                // Reapply volumes after a short delay to let DOM settle
+                setTimeout(() => {
+                    volumeLog('guestChangeObserver: Reapplying volumes after guest change');
+                    reapplyAllGuestVolumes();
+                    createVolumeSliders();
+                    updateVolumeSliderVisibility();
+                }, 100);
+            }
         }
     });
     
     guestChangeObserver.observe(fullscreenWrapper, { childList: true });
-    lastVideoTileCount = document.querySelectorAll('.fullscreen-wrapper > .video').length;
-    volumeLog('setupGuestChangeObserver: Initial video tile count:', lastVideoTileCount);
+    lastGuestUsernames = getCurrentGuestUsernames();
+    volumeLog('setupGuestChangeObserver: Initial guests:', [...lastGuestUsernames].join(', ') || '(none)');
 }
 
 // Single early volume application at startup - observers handle the rest
