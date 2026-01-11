@@ -30,13 +30,13 @@
         return text.replace(badWordsPattern, (match) => obfuscateWord(match));
     }
 
-    // Intercept fetch - only modify chat comment requests
+    // Intercept fetch - only modify chat comment POST requests
     const originalFetch = window.fetch;
     window.fetch = function(url, options) {
-        // Only intercept if bypass is enabled, we have words, and it's a chat comment
-        if (window.__betternowFilterBypass && badWordsPattern && options && options.body && typeof options.body === "string") {
-            // Only modify if this looks like a chat comment request
-            if (options.body.indexOf("comment=") >= 0 && (url.indexOf("/comment") >= 0 || url.indexOf("/chat") >= 0 || url.indexOf("api.younow.com") >= 0)) {
+        // Only intercept POST requests when bypass is enabled and we have words
+        if (window.__betternowFilterBypass && badWordsPattern && options && options.method && options.method.toUpperCase() === 'POST' && options.body && typeof options.body === "string") {
+            // Only modify if body has comment= and URL is specifically for posting comments
+            if (options.body.indexOf("comment=") >= 0 && typeof url === 'string' && url.indexOf("/php/api/broadcast/comment") >= 0) {
                 try {
                     const params = new URLSearchParams(options.body);
                     const comment = params.get("comment");
@@ -52,20 +52,21 @@
         return originalFetch.call(this, url, options);
     };
 
-    // Intercept XMLHttpRequest - only modify chat comment requests
+    // Intercept XMLHttpRequest - only modify chat comment POST requests
     const originalXHRSend = XMLHttpRequest.prototype.send;
     const originalXHROpen = XMLHttpRequest.prototype.open;
 
     XMLHttpRequest.prototype.open = function(method, url) {
         this._betternowUrl = url;
+        this._betternowMethod = method;
         return originalXHROpen.apply(this, arguments);
     };
 
     XMLHttpRequest.prototype.send = function(data) {
-        // Only intercept if bypass is enabled, we have words, and it's a chat comment
-        if (window.__betternowFilterBypass && badWordsPattern && typeof data === "string" && data.indexOf("comment=") >= 0) {
-            // Only modify if this looks like a chat comment request
-            if (this._betternowUrl && (this._betternowUrl.indexOf("/comment") >= 0 || this._betternowUrl.indexOf("/chat") >= 0 || this._betternowUrl.indexOf("api.younow.com") >= 0)) {
+        // Only intercept POST requests when bypass is enabled and we have words
+        if (window.__betternowFilterBypass && badWordsPattern && this._betternowMethod && this._betternowMethod.toUpperCase() === 'POST' && typeof data === "string" && data.indexOf("comment=") >= 0) {
+            // Only modify if URL is specifically for posting comments
+            if (this._betternowUrl && this._betternowUrl.indexOf("/php/api/broadcast/comment") >= 0) {
                 try {
                     const params = new URLSearchParams(data);
                     const comment = params.get("comment");
